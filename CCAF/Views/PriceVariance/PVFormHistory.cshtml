@@ -1,0 +1,336 @@
+﻿@using CCAF.Models
+
+@{
+    ViewBag.Title = "PVFormHistory";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style type="text/css">
+    .wrapperbox {
+        background: #fff;
+        float: left;
+        width: 100%;
+        position: relative;
+    }
+
+    .view-catalog-PVC {
+        float: left;
+        margin-top: 8px;
+        margin-left: 8px;
+    }
+
+    .table.order_table tr td:last-child {
+        text-align: center !important;
+    }
+
+    .for_PVCNumSeq {
+        font-size: 15px;
+        color: #e51635;
+        font-family: 'Montserrat', sans-serif;
+    }
+
+    .Actionbutton {
+        background: #fff;
+        color: #e51635;
+        display: inline-block;
+        border-radius: 5px;
+        font-family: 'Montserrat', sans-serif;
+        cursor: pointer;
+        border: 1px solid transparent;
+        transition: all 0.4s ease-in-out 0s;
+        -webkit-transition: all 0.4s ease-in-out 0s;
+        -moz-transition: all 0.4s ease-in-out 0s;
+        -o-transition: all 0.4s ease-in-out 0s;
+        outline: none;
+        font-size: 13px;
+        border: 1px solid transparent;
+    }
+    .btnsearch_pvchistory {
+        background: #e51635;
+        color: #fff;
+        margin-right: 20px;
+        padding: 3px 16px 3px 16px;
+        border-radius: 5px;
+        font-family: 'Montserrat', sans-serif;
+        cursor: pointer;
+        float: right;
+        border: 1px solid transparent;
+        transition: all 0.4s ease-in-out 0s;
+        font-size: 13px;
+        width:220px;
+        text-align:center;
+    }
+
+    .save_pvsearch {
+    background: #e51635;
+    color: #fff;
+    display: inline-block;
+    padding: 3px 16px 3px 16px;
+    border-radius: 5px;
+    font-family: 'Montserrat', sans-serif;
+    cursor: pointer;
+    float: right;
+    border: 1px solid transparent;
+    transition: all 0.4s ease-in-out 0s;
+    outline: none;
+    margin-top: 6px;
+    margin-right: 24px;
+    font-size: 13px;
+    width:200px;
+
+}
+    .first_left_side {
+    margin-top: 10px !important;
+}
+
+    .first_left_side p {
+        font-size: .8rem;
+        font-family: 'Montserrat', sans-serif;
+        margin-bottom: 8pspx !important;
+    }
+
+        .first_left_side p:first-child {
+            margin-top: 5px !important;
+        }
+
+
+    .first_left_side select {
+        font-size: .8rem;
+        font-family: 'Montserrat', sans-serif;
+        float: left;
+        margin-bottom: 16px;
+        border-bottom: 1px solid #e51635 !important;
+        outline: none;
+        width: 90%;
+        border: 0px;
+    }
+
+    
+</style>
+
+<div class="loader_overlay">
+    <img src="~/AcxiomDesign/images/Loading-red.gif" id="loading" height="250px" width="250px" />
+</div>
+<div class="wrapperbox">
+    <div class="top-title">
+        <h2>Price Variance History</h2>
+
+    </div>
+    <div class="for-top-border">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-2 col-md-2 col-sm-2 col-xs-12 ">
+                    <div class="first_left_side">
+                        <p class="btnsearch_pvchistory">@Html.DropDownList("HistoryStatusType", ViewBag.StatusTypeDropdown as SelectList, new { @class = "searchable", style = "width:150px", @onchange = "HistoryTypechange();" })</p>
+
+                        <p class="btnsearch_pvchistory">@Html.Label("From Date")</p>
+                        <p class="btnsearch_pvchistory">@Html.Label("To Date")</p>
+                    </div>
+                </div>
+                <div class="col-xs-3 col-md-3 col-sm-3 col-xs-3 mobileview-col-xs-3">
+                    <div class="first_right_side">
+                        @*<select  id="HistoryStatus" class = "searchable" style = "width:250px"></select>*@                       
+                        @Html.DropDownList("HistoryStatus", Enumerable.Empty<SelectListItem>(), new { @id = "HistoryStatus", @class = "searchable",style = "width:250px"})
+                        <p style="margin-top: 22px !important">@Html.TextBox("FromDate", new { @class = "flatpickr flatpickr-input active", @id = "FromDate", style = "width:200px" })</p>
+                        <p style="margin-top: 6px !important">@Html.TextBox("ToDate", new { @class = "flatpickr flatpickr-input active", @id = "ToDate", style = "width:200px" })</p>
+                    </div>
+
+                </div>
+                
+                </div>
+
+            <div class="row">
+
+                @*<div><button type="button" class="for-top-border" disabled id="btndetails">Details</button></div>*@
+                <div class="col-lg-2 col-md-2 col-sm-2 col-xs-12 ">&nbsp;</div>
+                    <div class="col-xs-3 col-md-3 col-sm-3 col-xs-3 mobileview-col-xs-3">
+                        <div class="save_button"> <button type="button" style="width:150px; margin-top: -5px;" class="for-top-border" onclick="Search_ButtonClick()">Search</button></div>
+                    </div>
+            </div>
+
+            @*<div class="col-lg-2 col-md-2 col-sm-2 col-xs-12">
+                <a href="javascript:void(0)" class="for-right-icon-two" onclick="ViewManageHierarchy()"><img src="~/AcxiomDesign/images/view-catalog.png"></a>
+            </div>*@
+        </div>
+    </div>
+      
+          
+    
+
+    <div class="container">
+        @*<div class="row for-row-margin">*@
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-zero">
+                <div class="left-side-bar for-order-margin">
+                    <div class="order_table_bg generate-order-styling">
+                        @*style="overflow-x:auto;"*@
+                        <table id="pvhistorytbl" class="table order_table for-center cell-border orderview-mobile">
+                            <thead>
+                                <tr>
+                                    <th style="text-align:left">PV Number</th>
+                                    <th style="text-align:left; width:83px !important">Submitted By</th>
+                                    <th style="text-align:left ;width: 100px !important">Submitted Date/Time</th>
+                                    <th style="text-align:left; width: 85px !important" >First  Approver</th>
+                                    <th style="text-align:left ;width: 100px !important">Approved Date/Time</th>
+                                    <th style="text-align:left; width: 90px !important">Second Approver</th>
+                                    <th style="text-align:left ;width: 100px !important">Approved Date/Time</th>
+                                    <th style="text-align:left; width: 90px !important">Third Approver</th>
+                                    <th style="text-align:left">Approved Date/Time</th>
+                                    <th style="text-align:left">Released by</th>
+                                    <th style="text-align:left ;width: 100px !important">Released Date/Time</th>
+                                    <th style="text-align:left ;width: 100px !important">Description</th>
+                                    <th style="text-align:left">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbdyoh"></tbody>
+
+                            <tfoot>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        @*</div>*@
+    </div>
+    </div>
+    <script type="text/javascript">
+            var check_in = flatpickr("#FromDate", { dateFormat: "d-M-Y", defaultDate: new Date()});
+            var check_out = flatpickr("#ToDate", { dateFormat: "d-M-Y",  defaultDate: new Date()});
+  
+        function Validate() {
+            var startDate = document.getElementById("FromDate").value;
+            var endDate = document.getElementById("ToDate").value;
+            if (startDate == '') {
+                ShowMessage('Please Pick a "From Date"!');
+                return false;
+            }
+            else if (endDate == '') {
+                ShowMessage('Please Pick a "To Date"!');
+                return false;
+            }
+
+            else if ((Date.parse(startDate) > Date.parse(endDate))) {
+                ShowMessage('"To Date" should be greater than "From Date"!');
+                return false;
+            }
+            else {
+                return true;
+            }
+        }
+
+        function Search_ButtonClick() {
+            $('#tbdyoh').html('');
+           
+            if (!Validate()) {
+                return;
+            }
+           
+            var tblStore = $('#tbdyoh');
+            var fromDate = $("#FromDate").val();
+            var toDate = $("#ToDate").val();
+            var FILTERID = $("#HistoryStatusType").val();
+            var FILTERVALUE = $("#HistoryStatus").val();
+            //var Parmlist = '{"FILTERID":"' + FILTERID + '","FILTERVALUE":"' + FILTERVALUE + '","FROMDATE":"' + fromDate + '","TODATE":"' + toDate + '"}';
+            $.ajax({
+                type: "GET",
+                crossDomain: true,
+                dataType: 'json',
+                url: '/PriceVariance/GetPVHistory?FILTERID=' + FILTERID + '&FILTERVALUE=' + FILTERVALUE + '&FROMDATE=' + fromDate + '&TODATE=' + toDate + '',
+                success: function (response) {
+                   
+                    var Data = JSON.parse(response);
+                   
+                    $.each(Data, function (index, obj) {
+                        var newRow = '<tr><td><a href="#" onclick="SendDataApproval(\'' + obj.PVNumber + '\',\'' + obj.PVSTATUS + '\')"> ' + obj.PVNumber + '</a> </td><td>' + obj.SubmittedBy + '</td><td>' + obj.Submitteddateandtime + '</td><td>' + obj.firstApprover + '</td><td>' + obj.firstApproveddateandtime + '</td><td>' + obj.secondApprover + '</td><td>' + obj.SecondApproveddateandtime + '</td>';
+                        newRow = newRow + '<td>' + obj.thirdApprover + '</td><td>' + obj.thirdApproveddateandtime + '</td><td>' + obj.RELEASEDBY + '</td><td>' + obj.RELEASEDDATETIME + '</td><td>' + obj.Description + '</td>';
+                        newRow = newRow + '<td>' + obj.STATUS+'</td></tr>';
+
+                        tblStore.append(newRow);
+                    });
+                },
+                complete: function () {
+                    $('#tbdyoh').show();
+                },
+                failure: function (text) {
+                    ShowMessage(text.responseText);
+                },
+                error: function (text, xhr, ajaxOptions, thrownError) {
+                   
+                    if (xhr.status === 401) {
+                        window.location.href = xhr.Data.LogOnUrl;
+                        return;
+                    }
+                    var table = $('#tbl').DataTable();
+                    table.clear().draw();
+                    var message;
+                    if (text.responseText == 'Empty') {
+                        message = 'No Records to Show in the Selected Date Range.';
+                    }
+                    else {
+                        message = 'No Records to Show in the Selected Date Range.';
+                    }
+                    ShowMessage(message);
+                }
+            });
+        }
+
+        function SendDataApproval(pvno,pvstatus)
+        {
+            if (pvstatus == 1 || pvstatus == 0 || pvstatus == 10)
+            {
+                var url = '/PriceVariance/PriceVariance?PVCNO=' + pvno + '&Pvstatus=' + pvstatus + '';
+                window.location.href = url
+            }
+
+            else
+            {
+                var url = '/PriceVariance/PriceVarianceApproval?PVCNO=' + pvno + '&Pvstatus=' + pvstatus + '';
+                window.location.href = url
+            }
+
+        }
+
+        function HistoryTypechange() {
+           
+            var Type = $('#HistoryStatusType').val();
+            
+            if (Type != '') {
+                $('#HistoryStatus').attr('enabled', 'true').chosen("destroy");
+                $.ajax({
+                    type: "GET",
+                    crossDomain: true,
+                    dataType: 'json',
+                    url: '/PriceVariance/GetPVType?Type=' + Type + '',
+                    success: function (responsedata) {
+                       
+
+                        var data = JSON.parse(responsedata);
+                        $("#HistoryStatus").empty();
+                        $('#HistoryStatus').attr('enabled', 'true').chosen("destroy");
+                        $('#HistoryStatus').append($("<option></option>").val('').html('Select an Option'));
+                        if (Type == "0") {
+                            $.each(data, function (index, obj) {
+                               
+
+                                $('#HistoryStatus').append($("<option></option>").val(obj.VALUE).html(obj.DESCRIPTION));
+
+                            });
+                        }
+                        else if (Type == "1") {
+                            $.each(data, function (index, obj) {
+                               
+                                $('#HistoryStatus').append($("<option></option>").val(obj.PVCNO).html(obj.PVCNO));
+
+                            });
+                        }
+                        else if (Type == "2") {
+                            $.each(data, function (index, obj) {
+                               
+                                $('#HistoryStatus').append($("<option></option>").val(obj.CREATEDBY).html(obj.NAME));
+
+                            });
+                        }                        
+                        $('#HistoryStatus').chosen();
+                    }
+                });
+            }
+        }
+    </script>

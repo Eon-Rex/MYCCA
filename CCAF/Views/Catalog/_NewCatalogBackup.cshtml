@@ -1,0 +1,257 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "NewCatalog";
+}
+<!DOCTYPE html>
+<script type="text/javascript" src="../AcxiomDesign/js/jquery.nice-number.js"></script>
+
+
+<script type="text/javascript">
+   
+
+    function btnAddtocart(code) {
+        $('.loader_overlay, #loading').show();
+
+        $('#lblPopItemid').val(code);
+        var itemtext = '#' + code;
+       
+        var carttotal = $('#cartval').text();//document.getElementById("cartval").value;
+        var qtytext = '#qty' + code;
+        var txtQty = $(qtytext).val();
+       
+        var itemId = $('#lblPopItemid').val();
+        var itemtext = '#' + itemId;
+        var itemPrevValue = $(itemtext).text();
+        var total = (+carttotal + +txtQty) - (+itemPrevValue);
+    
+        //var args = {
+        //    FunctionName: 'SAVEITEMCATALOGTOCART'
+        //    , objData: '{"ITEMID":"' + itemId + '","QTY":"' + txtQty + '"}'
+        //    , specific:2
+        //}
+        var selectedId = 'code';
+        $.ajax({
+            type: "GET",
+            crossDomain: true,
+            dataType: 'json',
+            //data: args,
+            //url: 'Url.Action("GetData", "GenerateOrder")', //BaseUrl + 'SAVEITEMCATALOGTOINDENT?itemid=' + itemId + '&qty=' + txtQty + '&sitecode=
+            url: '/Catalog/SAVEITEMCATALOGTOCART?ProductID=' + itemId + '&Qty=' + txtQty,
+            success: function (text) {
+           
+                if (text[0].status == 'success') {
+                    $('#cartval').html(total);
+                    $(itemtext).text(txtQty);
+                    //$('.catalog-overlay').fadeOut('500');
+                }
+                ////HttpContext.Current.Session["IndentNo"]=text.responseText;
+                //$('#lblIndentNo').val(text.replace(/\"/g, ""));
+                ////$.each(data, function (index, obj) {
+
+                ////});
+                //$('.catalog-overlay').fadeOut('500');
+            },
+            complete: function () {
+                $('#loading').hide();
+                $('.loader_overlay').fadeOut();
+            },
+            failure: function (text) {
+                alert(text.responseText);
+            },
+            error: function (text) {
+                alert(text.responseText);
+            }
+        });
+    };
+
+    $(document).ready(function () {
+
+        $('.loader_overlay, #loading').show();
+        $('.remove1').on('click', function () {
+            $('.catalog-overlay').fadeOut('500');
+        });
+        $('.cancel-qty').on('click', function () {
+            $('.catalog-overlay').fadeOut('500');
+        });
+        var productName = "";
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("ViewAllCatalog", "Catalog")',
+            datatype: 'application/json',
+            contentType: 'application/json',
+            success: function (data) {
+           
+                var mycartfigure = 0;
+                $.each($.parseJSON(data), function (i, obj) {
+                 
+                    productName = obj.Name.replace(/\'/g, "");
+                    $("#viewimagenewcatalogrow").append('<div class="col-lg-3 col-md-3 col-sm-3 col-xs-12"><div class="catalog_images_second images-bottom-margin"><img src="data:image/jpeg;base64,' + obj.Image + '"  /></div> <input id="lblPopItemid" name="lblPopItemid" type="hidden" value="0" /> <input id="lblIndentNo" name="lblPopItemid" type="hidden" value="0" /> <div class="new"><input class="quantity" id="qty' + obj.ItemId + '" type="number" min="0" maxlength="6" placeholder="0" /><div class="new_button"> <button type="button" onclick="btnAddtocart(\'' + obj.ItemId + '\');" id="btnAddtocart">Add to Cart</button> </div></div><div class="product_price_here"><label>' + productName + '</label><label class="label_bottom">$' + obj.Price + '</label><span id="' + obj.ItemId + '" style="display:none">' + obj.Qty + '</span></div></div>');
+                    mycartfigure += obj.Qty;
+                    var qtytext = '#qty' + obj.ItemId;
+                    $(qtytext).val(obj.Qty);
+                })
+                $('#cartval').html(mycartfigure);
+
+               // Validation script for input number Start
+
+                var inputQuantity = [];
+                $(function () {
+                    $(".quantity").each(function (i) {
+                        inputQuantity[i] = this.defaultValue;
+                        $(this).data("idx", i); // save this field's index to access later
+                    });
+                    $(".quantity").on("keyup", function (e) {
+                        var $field = $(this),
+                            val = this.value,
+                            $thisIndex = parseInt($field.data("idx"), 10); // retrieve the index
+                        //        window.console && console.log($field.is(":invalid"));
+                        //  $field.is(":invalid") is for Safari, it must be the last to not error in IE8
+                        if (this.validity && this.validity.badInput || isNaN(val) || $field.is(":invalid")) {
+                            this.value = inputQuantity[$thisIndex];
+                            return;
+                        }
+                        if (val.length > Number($field.attr("maxlength"))) {
+                            val = val.slice(0, 5);
+                            $field.val(val);
+                        }
+                        inputQuantity[$thisIndex] = val;
+                    });
+                });
+
+                // Vallidation for title
+
+                $('.product_price_here label').attr('title', function () { return $(this).text() });
+
+                $('input[type="number"]').niceNumber();
+                // End
+
+            },
+            complete: function () {
+                $('#loading').hide();
+                $('.loader_overlay').fadeOut();
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                ShowMessage("Something went wrong, Please try Again.")
+            }
+        });
+    });
+</script>
+
+<style type="text/css">
+    .confirm-product a {
+        background: transparent;
+    }
+
+        .confirm-product a:hover {
+            border-color: transparent;
+        }
+
+    label.price-label {
+        position: absolute;
+        bottom: 0px;
+        text-align: center;
+        width: 100%;
+        margin-left: -11px;
+    }
+
+    .for-bottom-margin {
+        margin-bottom: 50px;
+    }
+
+
+    .catalog-images {
+        margin-top: 21px;
+    }
+
+    .confirm-product {
+        width: 50%;
+        float: right;
+    }
+
+    .loader_overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        background: rgba(0, 0, 0, 0.5);
+        height: 100%;
+        width: 100%;
+        z-index: 2;
+        display: none;
+    }
+
+        .loader_overlay img {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%,-50%);
+            z-index: 4;
+        }
+</style>
+<div class="loader_overlay">
+    <img src="~/AcxiomDesign/images/Loading-red.gif" id="loading" height="250px" width="250px" />
+</div>
+
+<div class="wrapper">
+    @*<div class="catalog-overlay">
+        <div class="popup-qty">
+            <a href="javascript:void(0);" class="remove1"><img src="~/AcxiomDesign/images/exit.png" title="Close"></a>
+            <h1>Product Quantity</h1>
+            <span id="lblProductName"></span>
+            <input id="lblPopItemid" name="lblPopItemid" type="hidden" value="0" />
+            <input id="lblIndentNo" name="lblPopItemid" type="hidden" value="0" />
+            <input type="number" id="txtQty" min="0" pattern="/^-?\d+\.?\d*$/" onblur="if (this.value.length == 0) this.value=0" onClick="this.select();"
+                   onkeypress='return event.charCode >= 48 && event.charCode <= 57 && (this.value.length <= 5)' value="0" />
+            <div class="down-1">
+                <button type="button" onclick="btnAddtocart();" id="btnAddtocart" class="confirm-qty">Add to Cart</button>
+                <button class="cancel-qty">Cancel</button>
+            </div>
+        </div>
+    </div>*@
+    <div class="top-title"><h2>NewCatalog</h2></div>
+
+    <div class="container for-bottom-margin">
+        <div class="confirm-product my_cart_noti">
+            @*<a href="MyCart">Go To Cart</a>*@
+            <a href="MyCart"><img src="~/AcxiomDesign/images/fast_delivery.png" /></a>
+            <span id="cartval">0</span>
+          </div>
+        
+        <div class="clearfix"></div>
+
+
+        <div class="row" id="viewimagenewcatalogrow">
+
+        </div>
+
+
+        @*<div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+        <div class="catalog_images_second images-bottom-margin">
+            <img src="data:image/jpeg;base64,' + obj.Image + '" />
+            </div>
+        <div class="new">
+            <input class="quantity" type="number" min="1" maxlength="6" placeholder="1" />
+
+            <input type="number" id="txtQty" min="1" pattern="/^-?\d+\.?\d*$/" onblur="if (this.value.length == 0) this.value=0" onClick="this.select();"
+                   onkeypress='return event.charCode >= 48 && event.charCode <= 57 && (this.value.length <= 5)' value="0" />
+
+            <div class="new_button">
+            <button type="button" onclick="btnAddtocart();" id="btnAddtocart">Add to Cart</button>
+            </div>
+            </div>
+        <div class="product_price_here">
+            <label>' + productName + '</label>
+            <label class="label_bottom">$' + obj.Price + '</label>
+            </div>
+        </div>*@
+
+
+
+        </div>
+</div>
+
+<div class="footer-first">
+</div>
+
+
+
+

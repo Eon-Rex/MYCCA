@@ -1,0 +1,476 @@
+﻿
+@{
+    ViewBag.Title = "Manage Notification";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<title>Manage Notification</title>
+<script type="text/javascript">
+        $(document).ready(function ()
+        {
+            //image to base64 conversion code
+            document.getElementById('imageid').addEventListener('change', function (event) {
+
+                var myCanvas = document.getElementById('mycanvas');
+                var ctx = myCanvas.getContext('2d');
+                var img = new Image();
+                 img.onload = function () {
+                    myCanvas.width = img.width;
+                    myCanvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
+                    var url = myCanvas.toDataURL('image/jpeg');
+                    $("#urlv").val(url);
+                          };
+
+                 img.src = URL.createObjectURL(document.getElementById('imageid').files[0]);
+
+            });
+
+
+            document.getElementById('imageid2').addEventListener('change', function (event) {
+
+                var myCanvas = document.getElementById('mycanvas');
+                var ctx = myCanvas.getContext('2d');
+                var img = new Image();
+                img.onload = function () {
+                    myCanvas.width = img.width;
+                    myCanvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
+                    var url = myCanvas.toDataURL('image/jpeg');
+                    $("#urlv").val(url);
+
+                };
+
+                img.src = URL.createObjectURL(document.getElementById('imageid2').files[0]);
+
+            });
+
+            document.getElementById('imageid3').addEventListener('change', function (event) {
+
+                var myCanvas = document.getElementById('mycanvas');
+                var ctx = myCanvas.getContext('2d');
+                var img = new Image();
+                img.onload = function () {
+                    myCanvas.width = img.width;
+                    myCanvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
+                    var url = myCanvas.toDataURL('image/jpeg');
+                    $("#urlv").val(url);
+                };
+                img.src = URL.createObjectURL(document.getElementById('imageid3').files[0]);
+            });
+
+            document.getElementById('imageid4').addEventListener('change', function (event) {
+
+                var myCanvas = document.getElementById('mycanvas');
+                var ctx = myCanvas.getContext('2d');
+                var img = new Image();
+                img.onload = function () {
+                    myCanvas.width = img.width;
+                    myCanvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
+                    var url = myCanvas.toDataURL('image/jpeg');
+                    $("#urlv").val(url);
+                };
+                img.src = URL.createObjectURL(document.getElementById('imageid4').files[0]);
+            });
+
+            document.getElementById('imageid5').addEventListener('change', function (event) {
+                var myCanvas = document.getElementById('mycanvas');
+                var ctx = myCanvas.getContext('2d');
+                var img = new Image();
+                img.onload = function () {
+                    myCanvas.width = img.width;
+                    myCanvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
+                    var url = myCanvas.toDataURL('image/jpeg');
+                    $("#urlv").val(url);
+                };
+                img.src = URL.createObjectURL(document.getElementById('imageid5').files[0]);
+            });
+
+            document.getElementById('imageid6').addEventListener('change', function (event) {
+                var myCanvas = document.getElementById('mycanvas');
+                var ctx = myCanvas.getContext('2d');
+                var img = new Image();
+                img.onload = function () {
+                    myCanvas.width = img.width;
+                    myCanvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
+                    var url = myCanvas.toDataURL('image/jpeg');
+                    $("#urlv").val(url);
+                };
+                img.src = URL.createObjectURL(document.getElementById('imageid6').files[0]);
+            });
+
+            $('#mycanvas').hide();
+                     $.ajax({
+                type: 'POST', //HTTP POST Method
+                url: '@Url.Action("BindUserTyp", "Home")',
+                datatype: 'application/json',
+                contentType: 'application/json',
+
+                success: function (data) {
+                    var drpdwn = JSON.parse(data);
+                    $.each(drpdwn, function (index, optionData) {
+
+                        $("#usrtyp").append("<option value='" + optionData.TYPE + "'>" + optionData.DESCRIPTION + "</option>");
+
+                    });
+
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    //alert("Whooaaa! Something went wrong..")
+
+                }
+
+            });
+
+        });
+
+      function CheckValidation(detail,imid)
+      {
+
+          var baseurl = document.getElementById('urlv').value;
+          var itemid = '#' + imid;
+          var val = $(itemid).val();
+          var fileUpload = document.getElementById(imid);
+          if (val != "" && val !=undefined)
+          {
+              var size = parseFloat(fileUpload.files[0].size / 1024).toFixed(2);
+          }
+
+          if(detail=="Text")
+          {
+              var msg = $('#textmsg').val();
+              if (msg == "")
+                  ShowMessage("Please Enter Text Notification !"); // Change Acc to msg
+
+              else
+                  SaveNotification(detail);
+          }
+          else {
+
+
+              if (val == "")
+                  ShowMessage("Please Upload Image Notification !");  // Change Acc to msg
+
+          else if (!val.match(/(?:gif|jpg|png|bmp)$/)) {
+                  // inputted file path is not an image of one of the above types
+                  ShowMessage("Selected file is not an image!");
+          }
+
+
+          else if (size > 500)
+              {
+                      ShowMessage("Selected file is too Big!");
+              }
+
+              else
+                  SaveNotification(detail);
+          }
+
+      }
+
+         function SaveNotification(detail)
+         {
+             var baseurl = document.getElementById('urlv').value;
+             if(baseurl!=null)
+             var cnvrtedurl= baseurl.replace("data:image/jpeg;base64,", "");
+             var usrtyp = $('#usrtyp option:selected').val();
+             var msg = $('#textmsg').val();
+                $.ajax({
+                type: 'POST',
+                url: '@Url.Action("SaveNotification", "Home")',
+                data: "{'Image':'" + cnvrtedurl + "','TextMsg':'" + msg + "','Usertype':'" + usrtyp + "','Detail':'" + detail + "'}",
+                datatype: 'application/json',
+                contentType: 'application/json',
+                success: function (data) {
+                 ShowMessage(data); //  change as per request
+                 },
+                error: function (xhr, ajaxOptions, thrownError) {
+                   //alert("Whooaaa! Something went wrong..")
+                }
+                 });
+
+             if (baseurl != "")
+             {
+                 location.reload();
+             }
+             $('#textmsg').val('');
+        }
+
+        function ViewRecord() {
+
+            $('.loader_overlay, #loading').show();
+            var usrtyp = $('#usrtyp option:selected').val();
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("ViewRecord", "Home")',
+                data: "{'Usertype':'" + usrtyp + "'}",
+                datatype: 'application/json',
+                contentType: 'application/json',
+                success: function (data)
+                   {
+                    var dataval =JSON.parse(data);
+                    var s = dataval.Txt;
+                    var showdata = JSON.parse(s);
+                    var s1 = dataval.Img1;
+                    var showdata1 = JSON.parse(s1);
+                    var s2 = dataval.Img2;
+                    var showdata2 = JSON.parse(s2);
+                    if (showdata.length == 0) {
+                     $('#textmsg').val('No Text Notification Found !'); //change as per request
+                    }
+                    else {
+                        $.each(showdata, function (index, optionData) {
+                            $('#textmsg').val(optionData.Details);
+                            //$("#image1").attr('src', 'data:image/jpeg;base64,' + optionData.Details);
+                        });
+                    }
+
+
+                    if (showdata1.length == 0) {
+                        $("#image1").attr('src', '/AcxiomDesign/images/no_image.jpg'); //change as per request
+
+                    }
+                    else {
+                        $.each(showdata1, function (index, optionData) {
+
+                          $("#image1").attr('src', 'data:image/jpeg;base64,' + optionData.Details);
+                        });
+                    }
+
+
+                    if (showdata2.length == 0) {
+                        $("#image2").attr('src', '/AcxiomDesign/images/no_image.jpg'); //change as per request
+
+                    }
+                    else {
+                        $.each(showdata2, function (index, optionData) {
+
+                            $("#image2").attr('src', 'data:image/jpeg;base64,' + optionData.Details);
+                        });
+                    }
+
+                    var s3 = dataval.Img3;
+                    var showdata3 = JSON.parse(s3);
+                    if (showdata3.length == 0) {
+                        $("#image3").attr('src', '/AcxiomDesign/images/no_image.jpg'); //change as per request
+
+                    }
+                    else {
+                        $.each(showdata3, function (index, optionData) {
+
+                            $("#image3").attr('src', 'data:image/jpeg;base64,' + optionData.Details);
+                        });
+                    }
+
+                    var s4= dataval.Img4;
+                    var showdata4 = JSON.parse(s4);
+                    if (showdata4.length == 0) {
+                        $("#image4").attr('src', '/AcxiomDesign/images/no_image.jpg'); //change as per request
+
+                    }
+                    else {
+                        $.each(showdata4, function (index, optionData) {
+
+                            $("#image4").attr('src', 'data:image/jpeg;base64,' + optionData.Details);
+                        });
+                    }
+
+                    var s5 = dataval.Img5;
+                    var showdata5 = JSON.parse(s5);
+                    if (showdata5.length == 0) {
+                        $("#image5").attr('src', '/AcxiomDesign/images/no_image.jpg'); //change as per request
+
+                    }
+                    else {
+                        $.each(showdata5, function (index, optionData) {
+
+                            $("#image5").attr('src', 'data:image/jpeg;base64,' + optionData.Details);
+                        });
+                    }
+
+                    var s6= dataval.Img6;
+                    var showdata6 = JSON.parse(s6);
+                    if (showdata6.length == 0) {
+                        $("#image6").attr('src', '/AcxiomDesign/images/no_image.jpg'); //change as per request
+
+                    }
+                    else {
+                        $.each(showdata6, function (index, optionData) {
+
+                            $("#image6").attr('src', 'data:image/jpeg;base64,' + optionData.Details);
+                        });
+                    }
+
+                },
+                complete: function () {
+                    $('#loading').hide();
+                    $('.loader_overlay').fadeOut();
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    //alert("Whooaaa! Something went wrong..")
+                }
+            });
+        }
+
+</script>
+<style type="text/css">
+    a.for-right-icon img {
+        margin-top: -2px;
+        margin-bottom: 2px;
+    }
+</style>
+<div class="loader_overlay">
+    <img src="~/AcxiomDesign/images/Loading-red.gif" id="loading" height="250px" width="250px" />
+</div>
+<div class="wrapper">
+    <input type="hidden" id="urlv" name="urlv">
+    <div class="top-title">
+        <h2>Manage Notification</h2>
+    </div>
+
+    <div class="manage-catalog for-left-padding">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-2 col-md-2 col-sm-2 col-xs-12">
+                    <div class="first_left_side1">
+                        <p>Select User Type</p>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+                    <div class="first_left_side1 mobile_view_setting">
+                        <select id="usrtyp"></select>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 padding-zero">
+                    <a href="javascript:void(0)" onclick="ViewRecord()" class="for-right-icon second-manage"><img src="../AcxiomDesign/images/view-catalog.png"></a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="for-text-center">
+                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                    <div class="left-text-area">
+                        <span class="for-text">Text</span>
+                        <textarea rows="3" cols="30" maxlength="200" id="textmsg" class="for-text-area-width"></textarea>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                    <a href="javascript:void(0)" onclick="CheckValidation('Text')"><img src="~/AcxiomDesign/images/image006.png" alt="Save" title="Save" width="50px;" height="50px;" /></a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container managenotification_margin">
+        <div class="row">
+            <div class="col-lg-5 col-md-5 col-sm-5 col-xs-12">
+                <div class="notification-images">
+                    <p>Image 1</p>
+                    <img src="~/AcxiomDesign/images/no_image.jpg" id="image1" />
+                </div>
+            </div>
+
+            <div class="col-lg-7 col-md-7 col-sm-7 col-xs-12">
+                <div class="notification-page-button">
+                    <input type="file" id="imageid" />
+                    <canvas width="300" height="300" id="mycanvas"></canvas>
+
+                    <button onclick="CheckValidation('image1', 'imageid')" id="btn1">Upload</button>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="row">
+            <div class="col-lg-5 col-md-5 col-sm-5 col-xs-12">
+                <div class="notification-images">
+                    <p>Image 2</p>
+                    <img src="~/AcxiomDesign/images/no_image.jpg" id="image2" />
+                </div>
+            </div>
+
+            <div class="col-lg-7 col-md-7 col-sm-7 col-xs-12">
+                <div class="notification-page-button">
+                    <input type="file" id="imageid2" />
+                    <button onclick="CheckValidation('image2', 'imageid2')">Upload</button>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="row">
+            <div class="col-lg-5 col-md-5 col-sm-5 col-xs-12">
+                <div class="notification-images">
+                    <p>Image 3</p>
+                    <img src="~/AcxiomDesign/images/no_image.jpg" id="image3" />
+                </div>
+            </div>
+
+            <div class="col-lg-7 col-md-7 col-sm-7 col-xs-12">
+                <div class="notification-page-button">
+                    <input type="file" id="imageid3" />
+                    <button onclick="CheckValidation('image3', 'imageid3')">Upload</button>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="row">
+            <div class="col-lg-5 col-md-5 col-sm-5 col-xs-12">
+                <div class="notification-images">
+                    <p>Image 4</p>
+                    <img src="~/AcxiomDesign/images/no_image.jpg" id="image4" />
+                </div>
+            </div>
+
+            <div class="col-lg-7 col-md-7 col-sm-7 col-xs-12">
+                <div class="notification-page-button">
+                    <input type="file" id="imageid4" />
+                    <button onclick="CheckValidation('image4', 'imageid4')">Upload</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-5 col-md-5 col-sm-5 col-xs-12">
+                <div class="notification-images">
+                    <p>Image 5</p>
+                    <img src="~/AcxiomDesign/images/no_image.jpg" id="image5" />
+                </div>
+            </div>
+
+            <div class="col-lg-7 col-md-7 col-sm-7 col-xs-12">
+                <div class="notification-page-button">
+                    <input type="file" id="imageid5" />
+                    <button onclick="CheckValidation('image5', 'imageid5')">Upload</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-5 col-md-5 col-sm-5 col-xs-12">
+                <div class="notification-images">
+                    <p>Image 6</p>
+                    <img src="~/AcxiomDesign/images/no_image.jpg" id="image6" />
+                </div>
+            </div>
+
+            <div class="col-lg-7 col-md-7 col-sm-7 col-xs-12">
+                <div class="notification-page-button">
+                    <input type="file" id="imageid6" />
+                    <button onclick="CheckValidation('image6', 'imageid6')">Upload</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-first">
+    </div>
+</div>
+

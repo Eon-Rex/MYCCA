@@ -1,0 +1,259 @@
+﻿@{
+    ViewBag.Title = "Manage Catalogue";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="loader_overlay">
+    <img src="~/AcxiomDesign/images/Loading-red.gif" id="loading" height="250px" width="250px" />
+</div>
+    <div class="wrapper">
+        <input type="hidden" id="urlv" name="urlv">
+        <div class="top-title">
+            <h2>Manage Catalogue</h2>
+        </div>
+        <div class="manage-catalog">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                        <div class="for-responsive manage-generate catalog_select_box">
+                            <p>Select Product Pack :</p>@*Group*@
+                            <select id="DropProductGroup"></select>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                        <div class="manage-generate catalog_select_box">
+                            <p>Select Product :</p>
+                            <select id="DropProduct">
+                                @*<option>Coca Cola 300 ML</option>
+                                <option>Coca Cola 1.5 Ltr</option>
+                                <option>Coca Cola 2 Ltr</option>*@
+                            </select>
+                            <a href="javascript:void(0)" class="for-right-icon" onclick="ViewCatalog()"><img src="~/AcxiomDesign/images/view-catalog.png"></a>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
+                        <div class="view-catalog catalog_select_box">
+                            <div class="browse_btn">
+                                <input type="file" name="image1" id="imageid"/>
+                                <canvas width="300" height="300" id="mycanvas"></canvas>
+                                <a href="javascript:void(0)" class="alt-hie" style="float: right;" onclick="UploadCatalog()">Upload images</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+   
+        </div>
+
+        <div class="container catalog-top-margin" id="viewimagecatalog">
+            <div class="row" id="viewimagecatalogrow">
+                @*<div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+        <div class="catalog-images">
+            <img src="~/AcxiomDesign/images/thumb-1920-207290.jpg">
+        </div>
+                   
+    </div>
+
+    <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+        <div class="catalog-images">
+            <img src="~/AcxiomDesign/images/image-1-320-320.jpg">
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+        <div class="catalog-images">
+            <img src="~/AcxiomDesign/images/thumb-1920-238041.jpg">
+        
+        </div>
+    </div>
+
+                <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+                    <div class="catalog-images">
+                        <img src="~/AcxiomDesign/images/image-1-320-320.jpg">
+                    </div>
+                </div>*@
+            </div>
+
+        </div>
+        <div class="footer-first">
+        </div>
+    </div>
+<div class='ConfirmBox'>
+    <div class="demo-overlay">
+        <div class="demo-second">
+            <a href="javascript:void(0);" class="remove2">
+                <img src="~/AcxiomDesign/images/exit.png" title="Close">
+            </a>
+            <h2>Alert</h2>
+            <p><span id="lblMessage"></span></p>
+            <div class="demo-down">
+                @*<button class="cancel-demo cancelAction">Cancel</button>*@
+                <button class="cancel-demo doAction" onclick="reload()">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function ShowAlert(msg) {
+        $('#lblMessage').text(msg)
+        $('.demo-overlay').fadeIn('500');
+
+    }
+
+    function reload() {
+
+        location.reload();
+    }
+    $(document).ready(function () {
+        //image to base64 conversion code
+        document.getElementById('imageid').addEventListener('change', function (event) {
+
+            var myCanvas = document.getElementById('mycanvas');
+            var ctx = myCanvas.getContext('2d');
+            var img = new Image();
+            img.onload = function () {
+                myCanvas.width = img.width;
+                myCanvas.height = img.height;
+                ctx.drawImage(img, 0, 0);
+                var url = myCanvas.toDataURL('image/jpeg');
+                $("#urlv").val(url);
+            };
+
+            img.src = URL.createObjectURL(document.getElementById('imageid').files[0]);
+
+        });
+    $.ajax({
+        type: 'GET',
+        datatype: 'application/json',
+        contentType: 'application/json',
+        url:'@Url.Action("BindProductGrp", "Catalog")',
+        success: function (result) {
+            $("#DropProductGroup").html("");
+            $("#DropProductGroup").append(($('<option></option>').val("").html("Please Select")));
+            $.each($.parseJSON(result), function (i, obj) {
+                //$("#DropProductGroup").append("<option>" + obj.ProductGroup + "</option>");
+                $("#DropProductGroup").append($("<option></option>").text(obj.ProductPackName).val(obj.ProductPack));
+            })
+            $("#DropProductGroup").chosen();
+        },
+        error: function () {
+            alert("Whooaaa! Something went wrong..")
+        },
+    });
+
+        $('#mycanvas').hide();
+    });
+
+    $("#DropProductGroup").change(function (e) {
+           
+        var ProductGrp = $('#DropProductGroup option:selected').val();
+        $('#DropProduct').html('').trigger('chosen:updated');
+      //  $("#DropProduct").chosen().destroy();
+        $.ajax({
+            type: 'POST',
+            datatype: 'application/json',
+            contentType: 'application/json',
+            url: '@Url.Action("BindProduct", "Catalog")',
+            data: "{'PrdctGrp':'" + ProductGrp + "'}",
+            success: function (result) {
+          
+                $("#DropProduct").append(($('<option value=""></option>').html("Please Select")));
+                $.each($.parseJSON(result), function (i, obj) {
+                    $("#DropProduct").append("<option value='" + obj.ItemId + "'>" + obj.Name + "</option>");
+                })
+                $("#DropProduct").chosen().trigger('chosen:updated');
+            },
+            error: function () {
+                alert("Whooaaa! Something went wrong..")
+            },
+        });
+
+    });
+
+    function UploadCatalog()
+    {
+        var baseurl = document.getElementById('urlv').value;
+        var cnvrtedurl = baseurl.replace("data:image/jpeg;base64,", "");
+        var ProductGrp = $('#DropProductGroup option:selected').val();
+        var Itemid = $('#DropProduct option:selected').val();
+        var val = $("#imageid").val();
+       
+        var fileUpload = document.getElementById("imageid");
+        if (val != "" && val != "undefined") {
+            var size = parseFloat(fileUpload.files[0].size / 1024).toFixed(2);
+        }
+
+        if (ProductGrp == "") {
+            ShowAlert("Please Select Product Pack !");
+        }
+        else if(Itemid == "")
+            ShowAlert("Please Select Product !");
+        else if (!val.match(/(?:gif|jpg|png|bmp)$/)) {
+            
+            ShowAlert("Selected file is not an image!");
+        }
+        else if (size > 500) {
+            ShowAlert("Selected file is too Big!");
+        }
+        else {
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("UploadCatalog", "Catalog")',
+                data: "{'Image':'" + cnvrtedurl + "','ProductGrp':'" + ProductGrp + "','Itemid':'" + Itemid + "'}",
+                datatype: 'application/json',
+                contentType: 'application/json',
+                success: function (data) {
+
+                    ShowAlert(data); //  change as per request
+
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    alert("Whooaaa! Something went wrong..")
+
+                }
+
+            });
+            $('#DropProductGroup').val(0);
+            $('#DropProduct').val(0);
+        }
+      
+    }
+
+    function ViewCatalog()
+    {
+        $('.loader_overlay, #loading').show();
+        $('#viewimagecatalogrow').html('');
+        var ProductGrp = $('#DropProductGroup option:selected').val();
+        var Itemid = $('#DropProduct option:selected').val();
+     
+        if (ProductGrp!="")  {
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("ViewCatalog", "Catalog")',
+                data: "{'ProductGrp':'" + ProductGrp + "','Itemid':'" + Itemid + "'}",
+                datatype: 'application/json',
+                contentType: 'application/json',
+                success: function (data) {
+                   
+                    $.each($.parseJSON(data), function (i, obj) {
+
+                        $("#viewimagecatalogrow").append(" <div class='col-lg-3 col-md-3 col-sm-6 col-xs-12'><div class='catalog-images manage_catalog_margin'><img src='data:image/jpeg;base64," + obj.Image + "'> </div><label class='label-center'>" + obj.Name + "</label></div>");
+                    });
+                },
+                complete: function () {
+                    $('#loading').hide();
+                    $('.loader_overlay').fadeOut();
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    alert("Whooaaa! Something went wrong..")
+
+                }
+
+            });
+        }
+        else {
+            ShowAlert("Please Select Product Pack !");
+        }
+    }
+</script>

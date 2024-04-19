@@ -1,0 +1,387 @@
+﻿@{
+    ViewBag.Title = "GetOrderTrackingdOrder";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+}
+
+@*@{
+        List<OrderTrackingDetails> _trackingdetails = (List<OrderTrackingDetails>)ViewData["Orderlist"];
+        _trackingdetails.Count();
+    }*@
+
+<script type="text/javascript">
+  $(document).ready(function () {
+
+       var check_in = flatpickr("#FromDate", { dateFormat: "d-M-Y" });
+
+        var check_out = flatpickr("#ToDate", { dateFormat: "d-M-Y" });
+
+  });
+
+
+  function Validate() {
+      var startDate = document.getElementById("FromDate").value;
+      var endDate = document.getElementById("ToDate").value;
+      if (startDate == '') {
+          ShowMessage('Please Pick a "From Date"!');
+          return false;
+      }
+      else if (endDate == '') {
+          ShowMessage('Please Pick a "To Date"!');
+          return false;
+      }
+
+      else if ((Date.parse(startDate) > Date.parse(endDate))) {
+          ShowMessage('"To Date" should be greater than "From Date"!');
+          return false;
+      }
+      else {
+          return true;
+      }
+  }
+  function View_ButtonClick() {
+      $('#tbdyds').html('');
+    if (!Validate()) {
+      return;
+    }
+    var fromDate = $("#FromDate").val();
+    var toDate = $("#ToDate").val();
+
+
+    $("#tbdyds tr").remove();
+    var tblStore = $('#tbdyds');
+    $('.loader_overlay, #loading').show();
+    $.ajax({
+      type: "GET",
+      crossDomain: "true",
+      dataType: 'json',
+      url: '/OrderTracking/GetOrderTrackingdData?Fromdate=' + fromDate + '&Todate=' + toDate + '',
+      success: function (data) {
+        var Data = JSON.parse(data);
+        //debugger;
+        $.each(Data, function (i, val) {
+          ////call drop down function for reassign user/approver
+          var cn = val['Submitted'];
+          if (cn == "YES")
+            cn = cn.replace("YES", '<img src="/AcxiomDesign/images/right_icon.png" />');
+          else if (cn == "NO")
+            cn = cn.replace("NO", '<img src="/AcxiomDesign/images/alert_icon.png" />');
+          else if (cn == "NA")
+            cn = cn.replace("NA", '<img src="/AcxiomDesign/images/close_red.png" />');
+          else
+            cn = cn.replace("C-NA", '<img src="/AcxiomDesign/images/close_red.png" />');
+
+          var pn = val['Pending'];
+          if (pn == "YES")
+            pn = pn.replace("YES", '<img src="/AcxiomDesign/images/right_icon.png" />');
+          else if (pn == "NO")
+            pn = pn.replace("NO", '<img src="/AcxiomDesign/images/alert_icon.png" />');
+          else if (pn == "NA")
+            pn = pn.replace("NA", '<img src="/AcxiomDesign/images/close_red.png" />');
+          else
+            pn = pn.replace("C-NA", '<img src="/AcxiomDesign/images/close_red.png" />');
+
+          var sp = val['Approved'];
+          if (sp == "YES")
+            sp = sp.replace("YES", '<img src="/AcxiomDesign/images/right_icon.png" />');
+          else if (sp == "NO")
+            sp = sp.replace("NO", '<img src="/AcxiomDesign/images/alert_icon.png" />');
+          else if (sp == "NA")
+            sp = sp.replace("NA", '<img src="/AcxiomDesign/images/close_red.png" />');
+          else
+            sp = sp.replace("C-NA", '<img src="/AcxiomDesign/images/alert_icon_grey.png" />');
+
+          var dp = val['Cancelled'];
+          if (dp == "YES")
+            dp = dp.replace("YES", '<img src="/AcxiomDesign/images/right_icon.png" />');
+          else if (dp == "NO")
+            dp = dp.replace("NO", '<img src="/AcxiomDesign/images/alert_icon.png" />');
+          else if (dp == "NA")
+            dp = dp.replace("NA", '<img src="/AcxiomDesign/images/close_red.png" />');
+          else
+            dp = dp.replace("C-NA", '<img src="/AcxiomDesign/images/alert_icon_grey.png" />');
+
+          var de = val['Dispatched'];
+
+          if (de == "YES")
+            de = de.replace("YES", '<img src="/AcxiomDesign/images/right_icon.png" />');
+          else if (de == "NO")
+            de = de.replace("NO", '<img src="/AcxiomDesign/images/alert_icon.png" />');
+          else if (de == "NA")
+            de = de.replace("NA", '<img src="/AcxiomDesign/images/close_red.png" />');
+          else
+            de = de.replace("C-NA", '<img src="/AcxiomDesign/images/alert_icon_grey.png" />');
+
+          var vc = val['Invoiced'];
+          if (vc == "YES")
+            vc = vc.replace("YES", '<img src="/AcxiomDesign/images/right_icon.png" />');
+          else if (vc == "NO")
+            vc = vc.replace("NO", '<img src="/AcxiomDesign/images/alert_icon.png" />');
+          else if (vc == "NA")
+            vc = vc.replace("NA", '<img src="/AcxiomDesign/images/close_red.png" />');
+          else
+            vc = vc.replace("C-NA", '<img src="/AcxiomDesign/images/alert_icon_grey.png" />');
+
+          //debugger;
+            //alert(val['_reassignlist']);
+           trData = $('<tr><td data-rt-label="Order Date">' + val['OrderDate'] + '</td>' +
+            '<td data-rt-label="Order No">' + val['WebOrderNo'] + '</td>' +
+            '<td data-rt-label="Customer Number" >' + val['AccountNum'] + '</td>' +
+            '<td data-rt-label="Item Qty">' + val['ORDQTY'] + '</td>' +
+            '<td data-rt-label="Submitted">' + cn + '</td>' +
+            '<td data-rt-label="Submitted By">' + val['SubmittedBY'] + '</td>' +
+            '<td data-rt-label="Pending">' + pn + '</td>' +
+            '<td data-rt-label="Assigned To" id="' + val['WebOrderNo'] + '">' + val['ASSIGNTO'] + '</td>' +
+            '<td data-rt-label="Approved">' + sp + '</td>' +
+            '<td data-rt-label="Dispatched">' + de + '</td>' +
+            '<td data-rt-label="Invoiced">' + vc + '</td>' +
+            '<td data-rt-label="Cancelled">' + dp + '</td>' +
+            '<td data-rt-label="Reassign">' + getReassignCombo(val['WebOrderNo'], val['AccountNum'], val['_reassignlist']) + '</td>' +
+            //'<td data-rt-label="Reassign">' + Code + '</td></tr>');
+            '</tr>');
+          tblStore.append(trData);
+        });
+      },
+      complete: function () {
+        $('#loading').hide();
+        $('.loader_overlay').fadeOut();
+      },
+      error: function (xhr, ajaxOptions, thrownError) {
+          if (xhr.status === 401) {
+              window.location.href = xhr.Data.LogOnUrl;
+              return;
+          }
+          var table = $('#tbl').DataTable();
+          table.clear().draw();
+          var message;
+          if (text.responseText == 'Empty') {
+              message = 'No Records to Show in the Selected Date Range.';
+          }
+          else {
+              message = 'No Records to Show in the Selected Date Range.';
+          }
+          ShowMessage(message);
+      }
+    });
+  }
+
+  //-----------------------
+  function getReassignCombo(_webOrdNo,AccountNum, _data) {
+     debugger;
+
+    var id = 'cmb_' + _webOrdNo;
+    var selectforReassign = '<select class="tabel_text_box searchable" id="' + id + '" name="' + id + '" onchange="updReassignUser(\'' + _webOrdNo + '\',\'' + AccountNum + '\');">';
+
+    //createOptions(id, _data);
+
+    var opt = '<option value="">Re-Assign</option>';
+    selectforReassign += opt;
+
+    $.each(_data, function (i, val) {
+      opt = '<option value="' + val['ApproverCode'] + '">' + val['ApproverCode'] + '</option>';
+      selectforReassign += opt;
+    });
+
+    selectforReassign = selectforReassign + '</select>';
+
+    return selectforReassign;
+  }
+
+  function updReassignUser(_webordid,AccountNum) {
+      debugger;
+    var combo = $("#cmb_" + _webordid);
+    var approverCode = combo.val();
+    var AccountNum = AccountNum;
+    //var customercode = $('#Header_CustomerName').val();
+    //alert($("#cmb_" + _webordid).val());
+
+    if (approverCode == '') {
+      ShowMessage('Please select a approver"!');
+      return false;
+    }
+
+    $('.loader_overlay, #loading').show();
+
+    $.ajax({
+      type: "POST",
+      crossDomain: true,
+      dataType: 'json',
+      url: 'ReassignUser?weborderid=' + _webordid + '&reassignuser=' + approverCode + '&AccountNum=' + AccountNum,
+      success: function (data) {
+        //$("#" + _webordid).html('Test User');
+          ShowMessage("Reassigned user updated successfully");
+      },
+      complete: function () {
+        //delete_row('tbdyds', _webordid);
+        $('#loading').hide();
+        $('.loader_overlay').fadeOut();
+      },
+      failure: function (text) {
+        ShowMessage('Failed to update reassigned user');
+        $('#loading').hide();
+        $('.loader_overlay').fadeOut();
+      },
+      error: function (text) {
+        ShowMessage('Failed to update reassigned user');
+        $('#loading').hide();
+        $('.loader_overlay').fadeOut();
+      }
+    })
+  }
+  //For Reassign Remove Row
+  //function delete_row(id, given_value) {
+  //    var td = $("#" + id + " td");
+  //    $.each(td, function (i) {
+  //        if ($(td[i]).text() === given_value) {
+  //            $(td[i]).parent().remove();
+  //        }
+  //    });
+  //}
+
+
+
+  //-----------------------
+
+  //Get Manual Order Sync from Web Portal to AX
+  function syncOrder() {
+    $('.loader_overlay, #loading').show();
+    $.ajax({
+      type: 'POST',
+      url: '@Url.Action("PendingSyncOrder", "OrderTracking")',
+
+      datatype: 'application/json',
+      contentType: 'application/json',
+      success: function (data) {
+        ShowMessage(data);
+      },
+      complete: function () {
+        $('#loading').hide();
+        $('.loader_overlay').fadeOut();
+      },
+      error: function (xhr, ajaxOptions, thrownError) {
+        $('#loading').hide();
+        $('.loader_overlay').fadeOut();
+      }
+    });
+  }
+
+  function GetReAssignUser(id, dfval, customercode) {
+
+    var customercode = $('#Header_CustomerName').val();
+    $.ajax({
+      type: "GET",
+      crossDomain: true,
+      dataType: 'json',
+      url: 'ReassignUser?customercode=' + customercode,
+      success: function (data) {
+        //alert(data);
+        var def = dfval;//.split("-", "1");
+        var selectid = '#cmb_' + id;
+        $(selectid).attr('enabled', 'true').chosen("destroy");
+        //$(selectid).append($("<option></option>").text('Default').val('Default'));
+        $.each(data, function () {
+          $(selectid).append($("<option></option>").text(this.PriceGroupName).val(this.PriceGroup));
+          //if (this.PriceGroup == def.trim()) {
+          //    $(selectid).append($("<option selected></option>").text(this.PriceGroupName).val(this.PriceGroup));
+          //}
+          //else {
+          //    $(selectid).append($("<option></option>").text(this.PriceGroupName).val(this.PriceGroup));
+          //}
+        });
+        $(selectid).chosen();
+      },
+      failure: function (text) {
+        ShowMessage('PriceGroup not Found ' + text.responseText);
+      },
+      error: function (text) {
+        ShowMessage('PriceGroup not Found ' + text.responseText);
+      }
+    })
+  }
+</script>
+
+<style>
+    .middle {
+        margin-top: 5px !important;
+    }
+
+    .mg-btm {
+        margin-bottom: 10px;
+    }
+</style>
+
+<div class="loader_overlay">
+    <img src="~/AcxiomDesign/images/Loading-red.gif" id="loading" height="250px" width="250px" />
+</div>
+<div class="wrapper">
+    <div class="top-title"><h2>Order Tracking</h2></div>
+
+    <div class="container">
+        <div class="middle">
+
+            <div class="row for-row-margin for_label_styling">
+
+                <div class="col-lg-7 col-md-7 col-sm-7">
+                    <div class="form">
+
+                        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-12 ">
+                            <p>
+                                @Html.Label("From Date")
+                            </p>
+                        </div>
+                        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+                            <input id="FromDate" name="FromDate" class="flatpickr flatpickr-input active" type="text" />
+                        </div>
+
+                        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-12">
+                            <p>@Html.Label("To Date")</p>
+                        </div>
+                        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+                            <input id="ToDate" name="ToDate" class="flatpickr flatpickr-input active" type="text" />
+                        </div>
+
+                        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-12">
+                            <div class="save_button"> <button type="button" onclick="View_ButtonClick()">View</button></div>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-2">&nbsp;</div>
+                <div class="col-lg-3 col-md-3 col-sm-3">
+                    <div class="save_button"> <button onclick="syncOrder();" style="float:right;">Resend Pending Orders</button></div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="order_table_bg" style="overflow-x:auto;">
+            <table id="tbl" class="table order_table dashboarddata">
+                <thead>
+                    <tr>
+                        <th>Order Date</th>
+                        <th>Order No</th>
+                        <th>Customer Number</th>
+                        <th>Item Qty</th>
+                        <th>Submitted</th>
+                        <th>Submitted By</th>
+                        <th>Pending</th>
+                        <th>Assign To</th>
+                        <th>Approved</th>
+                        <th>Dispatched</th>
+                        <th>Invoiced</th>
+                        <th>Cancelled</th>
+                        <th>Reassign</th>
+                    </tr>
+                </thead>
+                <tbody id="tbdyds"></tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <div class="footer-first">
+    </div>
+</div>
+
+
+

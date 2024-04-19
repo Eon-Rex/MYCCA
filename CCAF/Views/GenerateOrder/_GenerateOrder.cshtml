@@ -1,0 +1,1156 @@
+﻿@model CCAF.Models.OrderViewModel
+@using CCAF.Models
+@{
+    ViewBag.Title = "GenerateOrder";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@*@using (Html.BeginForm("SaveOrderPostDB", "GenerateOrder", FormMethod.Post, new { enctype = "multipart/form-data", @class = "text-center" }))
+    {*@
+<style type="text/css">
+    .save_button button {
+        margin-top: -20px;
+        /* margin-right: 160px; */
+    }
+
+    .validate_button button {
+        margin-top: -46px;
+        margin-right: 50px;
+    }
+
+    .table.order_table tr td:last-child {
+        text-align: center !important;
+    }
+
+    input.uomclass {
+        text-align: center;
+    }
+</style>
+
+<div class="loader_overlay">
+    <img src="~/AcxiomDesign/images/Loading-red.gif" id="loading" height="250px" width="250px" />
+</div>
+
+<div class="wrapper">
+    @using (Html.BeginForm("GenerateOrder", "GenerateOrder", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        //Dont Remove it
+        @Html.AntiForgeryToken()
+        <div class="top-title">
+            <h2>Generate Order</h2>
+
+            <div class="save_button">
+                <button type="submit" onclick="showLoader();" disabled id="btnsave">Save</button>&nbsp;
+                <button type="button" onclick="validatesavebtnclick();" id="btnvalidate">Validate Stock</button>
+            </div>
+
+        </div>
+
+
+        <div class="for-top-border">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-1 col-md-1 col-sm-4 col-xs-6 padding-zero mobileview-col-xs-6">
+                        <div class="first_left_side mobileview-col-xs-6">
+                            <p>@Html.LabelFor(m => m.Header.CustomerName)</p>
+                            <p>@Html.LabelFor(m => m.Header.DeliveryType)</p>
+                            <p>@Html.LabelFor(m => m.Header.DeliveryDate)</p>
+                            <p>@Html.LabelFor(m => m.Header.OrderType, new { @style = "display:none", @id = "LabelOrderType" })</p>
+
+                            @*<p>@Html.LabelFor(m => m.Header.Remark)</p>*@
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-6 mobileview-col-xs-6">
+                        <div class="first_left_side for-float-right">
+                            @Html.DropDownListFor(m => m.Header.CustomerName, ViewBag.CustomerDropdown as SelectList, new { @class = "searchable", @onchange = "Customer_SelectedIndexChanged();" })
+                            @Html.DropDownListFor(m => m.Header.DeliveryType, ViewBag.DeliveryTypeDropdown as SelectList, new { @class = "searchable" })
+                            @Html.TextBoxFor(m => m.Header.DeliveryDate, new { @class = "inputdate flatpickr flatpickr-input active", @id = "DelDate" })  @*onchange="ValidateDelDate();"*@
+                            @Html.DropDownListFor(m => m.Header.OrderType, ViewBag.OrderTypeDropdown as SelectList, new { @class = "", @onchange = "OrderType_SelectedIndexChanged();", @style = "display:none" })
+                            @*<input type="date" name="dateofbirth" id="dateofbirth" class="inputdate">*@
+                            @*<textarea rows="2" cols="25" placeholder="Free Text (Max 200 Characters)"></textarea>*@
+
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-sm-2 col-xs-12 padding-zero">
+                        <div class="for_balance">
+                            <p>Cr Bal : $<span id="CrBalanceDisplay">0.00</span></p>
+                            <span id="CreditBalance" style="display:none"></span>
+                            <span id="OrderCheckFOC" style="display:none">false</span>
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-12 padding-zero mobileview-col-xs-6">
+                        <div class="first_right_side">
+                            <p>@Html.LabelFor(m => m.Header.Address)</p>
+                            <p>@Html.LabelFor(m => m.Header.Contact)</p>
+                            <p>@Html.LabelFor(m => m.Header.Remark)</p>
+                            <p>@Html.LabelFor(m => m.Header.ReasonofOrder)</p>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 mobileview-col-xs-6">
+                        <div class="first_right_side">
+                            @Html.TextBoxFor(m => m.Header.Address, new { @class = "address", @type = "text", @readonly = "true" })
+                            @Html.TextBoxFor(m => m.Header.Contact, new { @readonly = "true" })
+                            @Html.TextAreaFor(m => m.Header.Remark, new
+                   {
+                       @placeholder = "Free Text (Max 60 Characters)",
+                       @rows = "2",
+                       @cols = "25",
+                       @maxlength = "60"
+                   })
+                            @Html.TextAreaFor(m => m.Header.ReasonofOrder, new
+                   {
+                       @placeholder = "Free Text (Max 200 Characters)",
+                       @rows = "2",
+                       @cols = "25",
+                       @maxlength = "200"
+                   })
+                        </div>
+                    </div>
+
+
+
+                </div>
+            </div>
+        </div>
+
+        <div class="for-bg-color">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-2 col-md-2 col-sm-2 col-xs-12">
+                        <div class="middel-center">
+                            <p>Select Product :</p>
+                        </div>
+                    </div>
+
+
+                    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
+                        <div class="right-middel">
+                            @Html.DropDownListFor(m => m.AddLine.ProductCode, ViewBag.ItemListDropdown as SelectList, "Please Select",
+           new { @onchange = "Item_SelectedIndexChanged();", @class = "searchable" })
+                        </div>
+                    </div>
+                    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-12">
+                        <div class="price-section">
+                            <span id="AddLine_UOM"></span>
+                            <span id="Usertype" style="display:none">@Session["WOCUSTOMERTYPE"].ToString()</span>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-12 mobileview-col-xs-6">
+                        <div class="middel-center">
+                            <p>Quantity :</p>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 mobileview-col-xs-6 form-group-mobile">
+                        <div class="right-middel">
+                            <input class="for-width" id="Add_Qty" placeholder="0" onClick="this.select();" onkeypress='return event.charCode >= 48 && event.charCode <= 57' maxlength="6" value="">
+                            <button type="button" accesskey="A" onclick="AddButtonClick();">+ Add</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <div class="container">
+            <div class="row for-row-margin">
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-zero">
+                    <div class="left-side-bar for-order-margin">
+                        <div class="order_table_bg generate-order-styling">
+                            @*style="overflow-x:auto;"*@
+                            <table id="Linetbl" class="table order_table for-center cell-border orderview-mobile">
+                                <thead>
+                                    <tr>
+                                        <th>SrNo</th>
+                                        <th>Product Code</th>
+                                        <th>Product Name</th>
+                                        <th>Order Qty</th>
+                                        <th>UOM</th>
+                                        <th>Unit Price(VEP)</th>
+                                        <th>Unit Price(VIP)</th>
+                                        <th><span id="Price_GP" style="display:none">Price GP</span></th>
+                                        <th>Tax Amount</th>
+                                        <th style="text-align:center;">Extended Amount(VIP)</th>
+                                        <th>Outof Stock</th>
+                                        <th><img src="~/AcxiomDesign/images/cancel_red.png" /></th>
+                                        @*<th>Amount</th>*@
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td class="mobileviewnone"></td>
+                                        <td class="mobileviewnone"></td>
+                                        <td class="mobileviewnone"></td>
+                                        <td class="mobileviewnone"></td>
+                                        <td class="beforelabe">Total</td>
+                                        <td class="mobileviewnone"></td>
+                                        <td class="mobileviewnone"></td>
+                                        <td class="mobileviewnone"></td>
+                                        <td class="beforelabe"><span class="mobile-before-label">Tax Amount</span><span class="totalFooter" id="Total_Amount">0.00</span></td>
+                                        <td class="beforelabe"><span class="mobile-before-label">Extended Amount(VIP)</span><span id="Total_ExtendedPrice">0.00</span></td>
+                                        <td class="mobileviewnone"></td>
+                                        <td class="mobileviewnone"></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    }
+    <div class="footer-first">
+    </div>
+
+</div>
+@*}*@
+@Html.Raw(ViewBag.div)
+@Html.Raw(TempData["msg"])
+<script>
+    function checkNegOrderLine(data) {
+        var creditBal = $('#CreditBalance').text();
+        if (creditBal == '') {
+            creditBal = 0;
+        }
+        var CompareAmount = $('#Total_ExtendedPrice').text();
+        if (CompareAmount == '') {
+            CompareAmount = 0;
+        }
+
+        var OrderCheckFOC = $('#OrderCheckFOC').text();
+        //$('.demo-popup').on('click', function () {
+        //    $('.DraftOrderPopUp').fadeIn('500');
+        //});
+
+        if (OrderCheckFOC == '') {
+            OrderCheckFOC = 'false';
+        }
+        if (OrderCheckFOC == 'false') {
+
+            if (parseInt(creditBal) < (parseInt(CompareAmount)) + parseInt(data[0].EXTPRICEVIP)) {
+
+                var lblMessage = 'Extended Price VIP Has been exceed Credit Limit IF you proceed then Your Order will be Saved In Draft';
+                $('#lblMessage').html(lblMessage)
+                $('.DraftOrderPopUp').fadeIn('500');
+                return false;
+            }
+            else {
+                Get_LineItemAddCheck(2);
+            }
+        }
+        else
+        {
+            Get_LineItemAddCheck(2);
+        }
+    };
+    function yesfunction() {
+
+        Get_LineItemAddCheck(2);
+        $('.DraftOrderPopUp').fadeOut('700');
+    };
+
+    function nofunction() {
+        ResetAddLine();
+        $('.DraftOrderPopUp').fadeOut('700');
+    };
+
+    function Get_LineItemAddCheck(i) {
+        $('.loader_overlay, #loading').show();
+        var qty = $('#Add_Qty').val();
+        var itemid = $('#AddLine_ProductCode').val();
+        var customercode = $('#Header_CustomerName').val();
+        $.ajax({
+            type: "GET",
+            crossDomain: true,
+            dataType: 'json',
+            url: 'GetAddLineItem?ProductID=' + itemid + '&CustomerID=' + customercode + '&Qty=' + qty,
+            success: function (data) {
+                if (i == 1) {
+                    checkNegOrderLine(data);
+                }
+                else if (i == 2) {
+                    AddLineItemtoTable(data);
+                }
+            },
+            complete: function () {
+                $('#loading').hide();
+                $('.loader_overlay').fadeOut();
+            },
+            failure: function (text) {
+                ShowMessage('Item not Found, Please Retry.');
+                $('#loading').hide();
+                $('.loader_overlay').fadeOut();
+            },
+            error: function (text) {
+                ShowMessage('Item not Found, Please Retry.');
+                $('#loading').hide();
+                $('.loader_overlay').fadeOut();
+            }
+        })
+    }
+</script>
+
+<script type="text/javascript">
+    var qty,itemid;
+    function Get_LineItemAdd_Draft(qty,itemid) {
+
+        $('.loader_overlay, #loading').show();
+        var customercode = $('#Header_CustomerName').val();
+        $.ajax({
+            type: "GET",
+            crossDomain: true,
+            dataType: 'json',
+            url: 'GetAddLineItem?ProductID=' + itemid + '&CustomerID=' + customercode + '&Qty=' + qty,
+            success: function (data) {
+                AddLineItemtoTable(data);
+
+            },
+            complete: function () {
+                $('#loading').hide();
+                $('.loader_overlay').fadeOut();
+            },
+            failure: function (text) {
+                ShowMessage('Item not Found, Please Retry.');
+                $('#loading').hide();
+                $('.loader_overlay').fadeOut();
+            },
+            error: function (text) {
+                ShowMessage('Item not Found, Please Retry.');
+                $('#loading').hide();
+                $('.loader_overlay').fadeOut();
+            }
+        })
+    }
+
+
+            $(function
+      View_ButtonClick() {
+                $('#Linetbl tbody').html('');
+                var tblStore = $('#Linetbl tbody');
+
+
+                $.ajax({
+                    type: "GET",
+                    crossDomain: true,
+                    dataType: 'json',
+                    url: '/GenerateOrder/DraftOrder',
+                    success: function (response) {
+
+                        var table = $('#Linetbl').DataTable();
+                        //clear datatable
+                        table.clear().draw();
+                        //destroy datatable
+                        table.destroy();
+                        $.each(response, function (index, val) {
+
+                            var _Total_Amount = $('#Total_Amount');
+                            var _Total_ExtendedPrice = $('#Total_ExtendedPrice');
+
+                            Get_LineItemAdd_Draft(val['Qty'], val['ProductCode']);
+                        });
+
+                    },
+                    complete: function () {
+                        $('#theadao').show();
+
+                        var table = $('#Linetbl').DataTable({
+                            // responsive: true
+
+                            scrollCollapse: true
+                            , "bDestroy": true
+                          , "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]]
+                                 , "language": {
+                                     "search": ""
+                                     , "sLengthMenu": "Display _MENU_ Records"
+                                     , "info": "Displaying _START_ to _END_ of _TOTAL_ Records"
+                                     , "infoEmpty": "Displaying 0 to 0 of 0 Records"
+                                 }
+                                 , columnDefs: [{
+                                     targets: 0,
+                                     className: 'dt-body-center'
+                                 }, {
+                                     targets: -3,
+                                     className: 'dt-body-right'
+                                 }]
+                        });
+                        $('.dataTables_filter input').attr("placeholder", "Search");
+
+                        table.draw();
+                    },
+                    failure: function (text) {
+
+                        ShowMessage(text.responseText);
+                    },
+                    error: function (text, xhr, ajaxOptions, thrownError) {
+
+                        if (xhr.status === 401) {
+                            window.location.href = xhr.Data.LogOnUrl;
+                            return;
+                        }
+                        var table = $('#tbldraft').DataTable();
+                        table.clear().draw();
+                    }
+                });
+            });
+</script>
+
+<script type="text/javascript">
+
+  var gSeqNo = -1;
+  var gCount = 0;
+  var gInHandCount = 0;
+  var gCustCode = '';
+  var prodArr = [];
+  var qtyArr = [];
+  var seqArr = [];
+    $(document).ready(function () {
+        //    $('#Linetbl').DataTable({
+        //        responsive: true
+        //            , scrollY: 100
+        //           //,scrollCollapse: true
+        //             , "dom": '<"clear">'
+        //     //, "language": {
+        //     //    "search": ""
+        //     //}
+        //    });
+        var check_out = flatpickr("#DelDate", { dateFormat: "d-M-Y", minDate: new Date(), defaultDate: new Date() });
+        var table = $('#Linetbl').DataTable({
+            "dom": '<"clear">'
+            //, responsive: true
+            , "order": [[1, "desc"]]
+            , "bSort": false
+            , "aaSorting": [[]]
+            , paging: false
+            , "oLanguage": { "sZeroRecords": "", "sEmptyTable": "" }
+            , columnDefs: [{
+                targets: 0,
+                className: 'dt-body-center'
+            }, {
+                targets: 1,
+                className: 'dt-body-left'
+            }, {
+                targets: 2,
+                className: 'dt-body-nowrap'
+            }]
+            //, drawCallback: function () {
+            //    var api = this.api();
+            //    $(api.table().footer()).html(api.column([4]).data().sum());
+            //}
+        });
+        new $.fn.dataTable.FixedHeader(table, {
+            "alwaysCloneTop": true
+        });
+        //$("#Linetbl > tbody").empty().draw();
+        table.clear().draw();
+        Customer_SelectedIndexChanged();
+        //for Setting mIN dATE FOR Delivery Date
+        var now = new Date(),
+        minDate = now.toISOString().substring(0, 10);
+
+        $('#Header_DeliveryDate').prop('min', minDate);
+
+        if ($('#Usertype').text() == '0') {
+            $('#LabelOrderType').show();
+            $('#Header_OrderType').show().chosen();
+        }
+    });
+
+    function Customer_SelectedIndexChanged() {
+
+        $('.loader_overlay, #loading').show();
+        $('#Price_GP').hide();
+        ResetTable();
+        ResetAddLine();
+
+        var custid = $('#Header_CustomerName').val();
+        $.ajax({
+            type: "GET",
+            crossDomain: true,
+            dataType: 'json',
+            url: 'GetCustomerDetailsbyID?CustomerID=' + custid,
+            success: function (data) {
+                var psre = data[0].Address;
+                $('#Header_Address').val(data[0].Address);
+                $('#Header_Contact').val(data[0].Contact);
+                $('#CrBalanceDisplay').text(data[0].CRBALDISPLAY);
+                $('#CreditBalance').text(data[0].Credit);
+                //$('#Header_DeliveryType').val(data[0].DIVMODE).trigger("chosen:updated");
+                $('#Header_DeliveryType').val(data[0].DIVMODE);
+                $('#Header_OrderType').val(data[0].OrderType).trigger("chosen:updated");
+                //$('#Header_DeliveryType').val('').trigger("chosen:updated");
+                //$('#Header_OrderType').val('').trigger("chosen:updated");
+            },
+            complete: function () {
+                $('#loading').hide();
+                $('.loader_overlay').fadeOut();
+            },
+            failure: function (text) {
+                ShowMessage('Customer Details not Found, Please Try Again.');
+            },
+            error: function (text) {
+                ShowMessage('Customer Details not Found, Please Try Again.');
+            }
+        })
+
+    }
+
+    function OrderType_SelectedIndexChanged() {
+
+        $('.loader_overlay, #loading').show();
+
+        var ordertype = $('#Header_OrderType').val();
+        var Parmlist = '{"ORDERTYPE":"' + ordertype + '"}';
+
+        $.ajax({
+            type: "GET",
+            crossDomain: true,
+            dataType: 'json',
+            url: 'GetData?FunctionName=CHECKORDERTYPEFOC&objData=' + Parmlist + '&specific=1',
+            success: function (data) {
+                var psre = data[0].FOC;
+                $('#OrderCheckFOC').text(data[0].FOC);
+            },
+            complete: function () {
+                $('#loading').hide();
+                $('.loader_overlay').fadeOut();
+            },
+            failure: function (text) {
+                $('#loading').hide();
+                $('.loader_overlay').fadeOut();
+            },
+            error: function (text) {
+                $('#loading').hide();
+                $('.loader_overlay').fadeOut();
+            }
+        })
+
+    }
+
+    function Item_SelectedIndexChanged() {
+        //$("#AddLine_ProductCode").prop('selectedIndex', 0);
+
+        if ($("#AddLine_ProductCode").prop('selectedIndex') == 0) {
+            $('#AddLine_UOM').text('');
+            //$('#AddLine_Price').text('');
+            return;
+        }
+        var itemid = $('#AddLine_ProductCode').val();
+        $.ajax({
+            type: "GET",
+            crossDomain: true,
+            dataType: 'json',
+            url: 'GetItemDetailByID?ProductID=' + itemid,
+            success: function (data) {
+                $('#AddLine_UOM').text(data[0].UOM);
+                //$('#AddLine_Price').text(data[0].PRICE);
+            },
+            failure: function (text) {
+                $('#AddLine_UOM').text('');
+                ShowMessage('Item not Found, Please Retry.');
+            },
+            error: function (text) {
+                $('#AddLine_UOM').text('');
+                ShowMessage('Item not Found, Please Retry.');
+            }
+        })
+    }
+
+  function showLoader() {
+    $('.loader_overlay, #loading').show();
+  }
+
+  function validatesavebtnclick() {
+    var delvmode = $('#Header_DeliveryType').val();
+    var ordertype = $('#Header_OrderType').val();
+    var table = $("#Linetbl tbody");
+    var customercode = $('#Header_CustomerName').val();
+    var seqno = 0;
+    gSeqNo = -1;
+    gCount = 0;
+    gInHandCount = -1;
+    gCustCode = '';
+    prodArr = [];
+    qtyArr = [];
+    seqArr = [];
+
+
+    if (delvmode == null || delvmode == '') {
+      ShowMessage('Please Select Delivery Mode.');
+      return false;
+    }
+    else if (ordertype == null || ordertype == '') {
+      ShowMessage('Please Select Order Type.');
+      return false;
+    }
+
+    $("#Linetbl tr").each(function () {
+      var productId = $(this).find("input.x1").val(),
+        Quantity = $(this).find("input.x2").val();
+
+      if (typeof productId !== "undefined") {
+        prodArr.push(productId);
+        qtyArr.push(Quantity);
+        seqArr.push(this.id);
+      }
+    })
+    if (prodArr.length > 0) {
+      gCustCode = customercode;
+      callChkItemStock();
+    }
+
+    //$('#btnsave').prop('disabled', true);
+    //$('.loader_overlay, #loading').show(); //uncomment after testing
+    //return true;//uncomment after testing
+    //return false;//remove after testing
+  }
+
+  function callChkItemStock() {
+    if (prodArr.length > gCount) {
+        CheckItemStock(seqArr[gCount], gCustCode, prodArr[gCount], qtyArr[gCount]);
+        $('#btnvalidate').prop('disabled', true);
+    }
+    else {
+      $('#btnsave').prop('disabled', false);
+    }
+  }
+
+  function CheckItemStock(seqno, customercode, prodid, OrdQty) {
+    var OnHandQty = 0;
+    //alert(seqno + '==' + customercode + '==' + prodid + '==' + OrdQty);
+    $.ajax({
+      type: "GET",
+      crossDomain: true,
+      dataType: 'json',
+      url: 'GetItemStockList?CustomerID=' + customercode + '&ProductId=' + prodid,
+      success: function (data) {
+        OnHandQty = data;
+        if (OnHandQty < OrdQty)
+        {
+          //alert("SeqNo. : " + seqno + " Item : " + prodidList + " OnHand: " + OnHandQty + " OrdQty : " + Quantity);
+          gSeqNo = seqno;
+          var lblMessage1 = 'Order quantity ' + OrdQty + ' exceed the onhand quantity ' + OnHandQty + ' for product ' + prodid + '. Do you wish to proceed?';
+          $('#lblMessage1').html(lblMessage1)
+          $('.DraftOrderPopUpNew').fadeIn('500');
+
+          //return false;
+        }
+        else {
+          gSeqNo = seqno;
+          //alert("#outofstock_" + gSeqNo);
+          $("#outofstock_" + gSeqNo).attr("src","/AcxiomDesign/images/right_icon.png");
+          gCount += 1;
+          callChkItemStock();
+        }
+      },
+      failure: function (text) {
+        ShowMessage('Failed to get Item OnHandStock ' + text.responseText);
+      },
+      error: function (text) {
+        ShowMessage('Failed to get Item OnHandStock ' + text.responseText);
+      }
+    })
+  }
+
+  function yesfunction1() {
+    status = 0;
+    $('.DraftOrderPopUpNew').fadeOut('500');
+    $("#outofstock_" + gSeqNo).attr("src","/AcxiomDesign/images/close_red.png");
+    gCount += 1;
+    callChkItemStock();
+  };
+
+  function nofunction1() {
+    DeleteRow(gSeqNo);
+    status = 0;
+    $('.DraftOrderPopUpNew').fadeOut('500');
+    gCount += 1;
+    callChkItemStock();
+  };
+
+
+    //
+    //Add Button Click
+    function AddButtonClick() {
+        debugger;
+        var qty = $('#Add_Qty').val();
+
+        var delvmode = $('#Header_DeliveryType').val();
+        var ordertype = $('#Header_OrderType').val();
+        if (delvmode == null || delvmode == '') {
+            ShowMessage('Please Select Delivery Mode.');
+            return;
+        }
+        else if (ordertype == null || ordertype == '') {
+            ShowMessage('Please Select Order Type.');
+            return;
+        }
+        else if ($("#AddLine_ProductCode").prop('selectedIndex') == 0) {
+            ShowMessage('Please Select Product');
+            return;
+        }
+        else if (qty <= 0) {
+            ShowMessage('Please Enter Quantity');
+            return;
+        }
+        else if (CheckMultipleItemEntryExist()) {
+            return;
+        }
+        else {
+            //Get Set New Line
+
+            //AAA
+          Get_LineItemAddCheck(1);
+          $('#btnsave').prop('disabled', true);
+          $('#btnvalidate').prop('disabled', false);
+            return;
+           // Get_LineItemAdd();
+        }
+        //else {
+        //    ShowMessage('Total Amount can not Exceed Credit Balance, Please Check!');
+        //}
+    }
+
+    function CheckCredeitBalanceLimit() {
+        var value = parseInt($('#CreditBalance').val());
+    }
+
+    function CheckMultipleItemEntryExist() {
+
+        var response = false;
+        var itemid = $('#AddLine_ProductCode').val();
+        $("table tbody .ItemCell").each(function (index) {
+            if ($(this).val() == itemid) {
+                ShowMessage('The Selected Item : ' + itemid + ' is already present in the List.');// at line No : ' + parseInt(index + 1)
+                response = true;
+            }
+        });
+        return response;
+        //$("table tbody tr").each(function () {
+        //    //console.log(element);
+
+        //    alert($(this).attr("id"));
+        //    alert($(this).find('td:nth-child(2)').attr("id"));
+        //    alert($(this).find('td:nth-child(1)').attr("id"));
+        //    alert($(this).find('td:nth-last-child(1)').attr("id"));
+
+        //    //var val = $(this).find('td:nth-last-child(2)').val();
+        //    //alert($(this));
+        //    });
+        //var value = $('#Linetbl tr:nth-child(2) td:nth-child(2)').val();//.find('td:first')
+    }
+
+    function Get_LineItemAdd() {
+        $('.loader_overlay, #loading').show();
+        var qty = $('#Add_Qty').val();
+        var itemid = $('#AddLine_ProductCode').val();
+        var customercode = $('#Header_CustomerName').val();
+        debugger;
+        $.ajax({
+            type: "GET",
+            crossDomain: true,
+            dataType: 'json',
+            url: 'GetAddLineItem?ProductID=' + itemid + '&CustomerID=' + customercode + '&Qty=' + qty,
+            success: function (data) {
+                   AddLineItemtoTable(data);
+
+                //ResetAddLine();
+            },
+            complete: function () {
+                $('#loading').hide();
+                $('.loader_overlay').fadeOut();
+            },
+            failure: function (text) {
+                ShowMessage('Item not Found, Please Retry.');
+                $('#loading').hide();
+                $('.loader_overlay').fadeOut();
+            },
+            error: function (text) {
+                ShowMessage('Item not Found, Please Retry.');
+                $('#loading').hide();
+                $('.loader_overlay').fadeOut();
+            }
+        })
+    }
+
+    function AddLineItemtoTable(data) {
+        debugger;
+        var creditBal = $('#CreditBalance').text();
+        if (creditBal == '') {
+            creditBal = 0;
+        }
+        var CompareAmount = $('#Total_ExtendedPrice').text();
+        if (CompareAmount == '') {
+            CompareAmount = 0;
+        }
+            //AAA 10-09-21
+            //var OrderCheckFOC = $('#OrderCheckFOC').text();
+            //if (OrderCheckFOC == '') {
+            //    OrderCheckFOC = 'false';
+            //}
+            //if (OrderCheckFOC == 'false') {
+            //    if (parseInt(creditBal) < (parseInt(CompareAmount)) + parseInt(data[0].EXTPRICEVIP)) {
+            //        ShowMessage('Extended Amount VIP Total can not exceed Credit Balance');
+            //        return;
+            //    }
+            //    else {
+            //        ResetAddLine();
+            //    }
+            //}
+            //AAA
+
+        else {
+            ResetAddLine();
+        }
+
+        var seqNo = 0;
+        var RowCount = $("#Linetbl > tbody").find("tr").length;
+        if (RowCount == 0) {
+            seqNo = 0;
+        }
+        else {
+            //seqNo = parseInt($("#Linetbl > tbody").find("tr").length)+1;
+            seqNo = parseInt($("#Linetbl > tbody").find("tr:last").attr("id")) + 1;
+            if (isNaN(seqNo)) {//isNaN
+                seqNo = 0
+            }
+            //parseInt($("#Linetbl > tbody").find("tr").length);
+            //parseInt($('#Linetbl tr:last').find('td:first').attr('id'))+1;
+            var val = parseInt($("#Linetbl > tbody").find("tr:last").find("td:first").attr("id")) + 1;
+            //= parseInt($("#Linetbl > tbody").find("tr:nth-child(2)").attr("id")) + 1;
+        }
+        //HTML Tags for Corresponding Fields
+        var Productid = getTDForRowCreation('ProductCode', data[0].PRODUCTCODE, seqNo, 'tabel_text_box ItemCell x1');
+        var ProductName = data[0].PRODUCTNAME;  //getTDForRowCreation('ProductName',  data[0].PRODUCTNAME, seqNo, 'tabel_text_box');
+        var UOM = getTDForRowCreation('UOM', data[0].UOM, seqNo, 'tabel_text_box uomclass');
+        var Qty = getTDForRowCreation('Qty', data[0].QUANTITY, seqNo, 'tabel_text_box textboxValRightAlign x2');
+        var UnitPriceVEP = getTDForRowCreation('UnitPriceVEP', data[0].UNITPRICEVEP, seqNo, 'tabel_text_box textboxValRightAlign');
+        var UnitPriceVIP = getTDForRowCreation('UnitPriceVIP', data[0].UNITPRICEVIP, seqNo, 'tabel_text_box textboxValRightAlign');
+        var custid = $('#Header_CustomerName').val();
+        var PriceGP = '';
+        if ($('#Usertype').text() == '0') {
+            $('#Price_GP').show();
+            PriceGP = getTDSelectForRowCreation('PRICEGP', data[0].PRICEGP, seqNo, 'tabel_text_box');
+        }
+        //if ($('#Header_CustomerName option').length > 1 && $('#Header_CustomerName').prop('selectedIndex') != 0) {
+        //    $('#Price_GP').show();
+        //    PriceGP = getTDSelectForRowCreation('PRICEGP', data[0].PRICEGP, seqNo, 'tabel_text_box');
+        //}
+
+        var TaxAmount = getTDForRowCreation('TaxAmount', data[0].TAXAMOUNT, seqNo, 'tabel_text_box textboxValRightAlign');
+        var ExtPrice = getTDForRowCreation('ExtendedPriceVIP', data[0].EXTPRICEVIP, seqNo, 'tabel_text_box textboxValRightAlign');
+
+        var AdjustedPrice = getTDHiddenForRowCreation('AdjustedPrice', data[0].ADJUSTEDPRICE, seqNo, '');
+        var Discount = getTDHiddenForRowCreation('Discount', data[0].DISCOUNT, seqNo, '');
+        var VAT = getTDHiddenForRowCreation('VAT', data[0].VAT, seqNo, '');
+
+        var SrNo = parseInt(seqNo) + 1;
+        //var newRow = '<tr id="' + seqNo + '"><td>' + SrNo + '</td><input type="hidden" name="Line.Index" value="' + seqNo + '" /><td id="' + data[0].PRODUCTCODE + '">' + Productid + '</td><td>' + ProductName + '</td><td>' + Qty + '</td>';
+        //newRow = newRow + '<td>' + UOM + '</td><td>' + UnitPriceVEP + '</td><td>' + UnitPriceVIP + '</td>';
+        //newRow = newRow + '<td>' + PriceGP + '</td><td>' + TaxAmount + '</td><td>' + ExtPrice + '</td>'; //<td>' + Amount + '</td>
+        //newRow = newRow + '<td><img onclick="DeleteRow(\'' + seqNo + '\');" class="icon-delete" src="../AcxiomDesign/images/cancel.png">' + AdjustedPrice + Discount + VAT + '</td></tr>';
+
+        var newRow = '<tr id="' + seqNo + '"><td><span class="mobile-before-label">SrNo</span>' + SrNo + '</td><input type="hidden" name="Line.Index" value="' + seqNo + '" /><td id="' + data[0].PRODUCTCODE + '"><span class="mobile-before-label">Product Code</span>' + Productid + '</td><td><span class="mobile-before-label">Product Name</span>' + ProductName + '</td><td><span class="mobile-before-label">Order Qty</span>' + Qty + '</td>';
+        newRow = newRow + '<td><span class="mobile-before-label">UOM</span>' + UOM + '</td><td><span class="mobile-before-label">Unit Price(VEP)</span>' + UnitPriceVEP + '</td><td><span class="mobile-before-label">Unit Price(VIP)</span>' + UnitPriceVIP + '</td>';
+        newRow = newRow + '<td><span class="mobile-before-label">Price GP</span>' + PriceGP + '</td><td><span class="mobile-before-label">Tax Amount</span>' + TaxAmount + '</td><td><span class="mobile-before-label">Extended Amount(VIP)</span>' + ExtPrice + '</td>'; //<td>' + Amount + '</td>
+        newRow = newRow + '<td class="center-img"><span class="mobile-before-label">OutofStock</span><img id="outofstock_' + seqNo +  '" src="/AcxiomDesign/images/alert_icon.png" /></td><td><span class="mobile-before-label">Delete</span><img onclick="DeleteRow(\'' + seqNo + '\');" class="icon-delete" src="../AcxiomDesign/images/cancel.png">' + AdjustedPrice + Discount + VAT + '</td></tr>';
+
+
+        var table;
+        //var parmid = 'PRICEGP_' + seqNo;
+
+        //GetSetSelectDataPriceGroup(parmid);
+        table = $('#Linetbl').DataTable();
+        table.row.add($(newRow)).draw();
+
+        //table.column(1).visible();
+
+        var _Total_ExtendedPrice = $('#Total_ExtendedPrice').text();
+
+        if (_Total_ExtendedPrice == '') {
+            _Total_ExtendedPrice = 0.00;
+        }
+
+        _Total_ExtendedPrice = (+_Total_ExtendedPrice) + (+data[0].EXTPRICEVIP);
+
+        $('#Total_ExtendedPrice').text(_Total_ExtendedPrice.toFixed(2));
+        var _Total_Amount = $('#Total_Amount').text();
+        if (_Total_Amount == '') {
+            _Total_Amount = 0.00;
+        }
+        _Total_Amount = (+_Total_Amount) + (+data[0].TAXAMOUNT);
+
+        $('#Total_Amount').text(_Total_Amount.toFixed(2));
+
+
+        //fromblock == 'BLOCK' ? 'UNBLOCK' : 'BLOCK';
+        //var monTotal = table.column(7).data().sum();
+        //table.column(6).footer().html(monTotal);
+        //alert(monTotal);
+        //$(api.column(6).footer()).html(monTotal);
+
+        //table.draw();
+        //$('#Linetbl').draw();
+    }
+
+    function ResetAddLine() {
+        $('#Add_Qty').val(0);
+        $('#AddLine_UOM').text('');
+        $("#AddLine_ProductCode").get(0).selectedIndex = 0;
+        $("#AddLine_ProductCode").chosen("destroy").chosen();
+    }
+
+    function ResetTable() {
+        var table = $('#Linetbl').DataTable();
+        table.clear().draw();
+        $("#Linetbl > tbody").empty();
+    }
+
+    function getTDForRowCreation(tdfor, tdval, trSeqNo, cssClass) {
+        var _TDFor = tdfor;
+        var _TDVal = tdval;
+        var _TRSeqNo = trSeqNo;
+        var upNewTDVal = '<input align="right" class="valid ' + cssClass + '" id="' + _TDFor + '_' + _TRSeqNo + '" name="Line[' + _TRSeqNo + '].' + _TDFor + '" readonly="true" type="text" value="' + _TDVal + '">';
+        return upNewTDVal;
+    }
+
+    function getTDHiddenForRowCreation(tdfor, tdval, trSeqNo, cssClass) {
+        var _TDFor = tdfor;
+        var _TDVal = tdval;
+        var _TRSeqNo = trSeqNo;
+        var upNewTDVal = '<input align="right" class="valid ' + cssClass + '" id="' + _TDFor + '_' + _TRSeqNo + '" name="Line[' + _TRSeqNo + '].' + _TDFor + '" readonly="true" type="hidden" value="' + _TDVal + '">';
+        return upNewTDVal;
+    }
+
+    function getTDSelectForRowCreation(tdfor, tdval, trSeqNo) {
+        var _TDFor = tdfor;
+        var _TDVal = tdval;
+        var _TRSeqNo = trSeqNo;
+
+        //var id = _TDFor + '_' + _TRSeqNo;
+        //var selectforPriceGroup = '<select class="tabel_text_box searchable" id="' + id + '" name="Line[' + _TRSeqNo + '].' + _TDFor + '" onchange="GridPriceGroupChange(\''+_TRSeqNo+'\');">';
+        //selectforPriceGroup = selectforPriceGroup + '</select>';
+        //return selectforPriceGroup;
+
+        var id = _TDFor + '_' + _TRSeqNo;
+        var selectforPriceGroup = '<select class="tabel_text_box searchable" id="' + id + '" name="Line[' + _TRSeqNo + '].' + _TDFor + '" onchange="GridPriceGroupChange(\'' + _TRSeqNo + '\');">';
+        GetSetSelectDataPriceGroup(id, _TDVal);
+        selectforPriceGroup = selectforPriceGroup + '</select>';
+        return selectforPriceGroup;
+    }
+
+    function GridPriceGroupChange(id) {
+        $('.loader_overlay, #loading').show();
+
+        var _ITEMID = '#ProductCode_' + id;
+        var _PRICEGROUP = '#PRICEGP_' + id;
+        var _QTY = '#Qty_' + id;
+        var _custid = '#Header_CustomerName';
+
+        var _UnitPriceVIP = '#UnitPriceVIP_' + id;
+        var _UnitPriceVEP = '#UnitPriceVEP_' + id;
+        var _TaxAmount = '#TaxAmount_' + id;
+        var _ExtendedPriceVIP = '#ExtendedPriceVIP_' + id;
+        //var Parmlist = '{"PRICEGROUP":"' + $(_PRICEGROUP).val() + '","ITEMID":"' + $(_ITEMID).val() + '","QTY":"' + $(_QTY).val() + '"}';
+        $.ajax({
+            type: "GET",
+            crossDomain: true,
+            dataType: 'json',
+            url: '/GenerateOrder/GetAddLineItemOnPriceGroupChange?ProductID=' + $(_ITEMID).val() + '&CustomerID=' + $(_custid).val() + '&Qty=' + $(_QTY).val() + '&Pricegroup=' + $(_PRICEGROUP).val(),
+            success: function (response) {
+                var ExtPriceVIP_Old = $(_ExtendedPriceVIP).val();
+                var TaxAmount_Old = $(_TaxAmount).val();
+                $(_UnitPriceVIP).val(response[0].UNITPRICEVIP);
+                $(_UnitPriceVEP).val(response[0].UNITPRICEVEP);
+                $(_TaxAmount).val(response[0].TAXAMOUNT);
+                $(_ExtendedPriceVIP).val(response[0].EXTPRICEVIP);
+
+                //update Footer
+                var _Total_ExtendedPrice = $('#Total_ExtendedPrice').text();
+                if (_Total_ExtendedPrice == '') {
+                    _Total_ExtendedPrice = 0.00;
+                }
+                _Total_ExtendedPrice = (+_Total_ExtendedPrice) - (+ExtPriceVIP_Old) + (+response[0].EXTPRICEVIP);
+
+                $('#Total_ExtendedPrice').text(_Total_ExtendedPrice.toFixed(2));
+                var _Total_Amount = $('#Total_Amount').text();
+                if (_Total_Amount == '') {
+                    _Total_Amount = 0.00;
+                }
+                _Total_Amount = (+_Total_Amount) - (+TaxAmount_Old) + (+response[0].TAXAMOUNT);
+                $('#Total_Amount').text(_Total_Amount.toFixed(2));
+
+            },
+            complete: function () {
+                $('#loading').hide();
+                $('.loader_overlay').fadeOut();
+            },
+            failure: function (text) {
+                ShowMessage('Price group Not Changed, Please Retry.');
+            },
+            error: function (text) {
+                var message = 'Price group Not Changed, Please retry';
+                ShowMessage(message);
+            }
+        });
+
+
+        //var UnitPriceVIP, UnitPriceVEP, TaxAmount, ExtendedPriceVIP;
+
+        //$('#' + id).find("td input:text,td select").each(function (){
+        //    if ($(this).attr("name") == _UnitPriceVIP) {
+        //        this.value = '5';
+        //    }
+        //    var _UnitPriceVIP = 'Line[' + id + '].UnitPriceVIP';
+        //    var textVal = this.value;
+        //    var inputName = $(this).attr("name");
+        //    formData += '&' + inputName + '=' + textVal;
+        //});
+
+
+        //var formData;
+        //$('#' + id).find("td input:text,td select").each(function () {
+        //    var textVal = this.value;
+        //    var inputName = $(this).attr("name");
+        //    formData += '&' + inputName + '=' + textVal;
+        //});
+
+        //$('#' + id).find("td input:text,td select").each(function () {
+        //    var _UnitPriceVIP = 'Line[' + id + '].UnitPriceVIP';
+        //    var _UnitPriceVEP = 'Line[' + id + '].UnitPriceVEP';
+        //    var _TaxAmount = 'Line[' + id + '].TaxAmount';
+        //    var _ExtendedPriceVIP = 'Line[' + id + '].ExtendedPriceVIP';
+        //    if ($(this).attr("name") == _UnitPriceVIP) {
+        //        this.value = '5';
+        //    }
+        //    else if ($(this).attr("name") == _UnitPriceVEP) {
+        //        this.value = '6';
+        //    }
+        //    else if ($(this).attr("name") == _TaxAmount) {
+        //        this.value = '7';
+        //    }
+        //    else if ($(this).attr("name") == _ExtendedPriceVIP) {
+        //        this.value = '9';
+        //    }
+        //});
+
+        // alert(formData);
+        //return;
+        //$('#Linetbl tr:last').find('td:first').attr('id');
+        //$(this).find('td').each(function () {
+        //    // do your cool stuff
+        //});
+        //$(this).closest('tr').find("td").find("input").each(function () {
+        //    alert(this.value)
+        //});
+        //ShowMessage('GridPriceGroupChange Event Triggered');
+    }
+
+    function GetSetSelectDataPriceGroup(id, dfval) {
+
+        var customercode = $('#Header_CustomerName').val();
+        $.ajax({
+            type: "GET",
+            crossDomain: true,
+            dataType: 'json',
+            url: 'GetDataForPriceGroup?CustomerID=' + customercode,
+            success: function (data) {
+                //alert(data);
+
+                var def = dfval;//.split("-", "1");
+                var selectid = '#' + id;
+                $(selectid).attr('enabled', 'true').chosen("destroy");
+                //$(selectid).append($("<option></option>").text('Default').val('Default'));
+                $.each(data, function () {
+                    $(selectid).append($("<option></option>").text(this.PriceGroupName).val(this.PriceGroup));
+                    //if (this.PriceGroup == def.trim()) {
+                    //    $(selectid).append($("<option selected></option>").text(this.PriceGroupName).val(this.PriceGroup));
+                    //}
+                    //else {
+                    //    $(selectid).append($("<option></option>").text(this.PriceGroupName).val(this.PriceGroup));
+                    //}
+                });
+                $(selectid).chosen();
+            },
+            failure: function (text) {
+                ShowMessage('PriceGroup not Found ' + text.responseText);
+            },
+            error: function (text) {
+                ShowMessage('PriceGroup not Found ' + text.responseText);
+            }
+        })
+    }
+
+    function DeleteRow(id) {
+
+        //return;
+
+        var deleteByid = '#' + id;
+        var TaxAmountid = '#TaxAmount_' + id;
+        var ExtPriceVIPid = '#ExtendedPriceVIP_' + id;
+        var TaxAmount = $(TaxAmountid).val();
+        TaxAmount = TaxAmount == '' ? 0 : TaxAmount;
+        var ExtPriceVIP = $(ExtPriceVIPid).val();
+        ExtPriceVIP = ExtPriceVIP == '' ? 0 : ExtPriceVIP;
+        //$(deleteByid).remove();
+        var table = $('#Linetbl').DataTable().row($(deleteByid))
+            .remove()
+            .draw();
+
+        //update Footer
+        var _Total_ExtendedPrice = $('#Total_ExtendedPrice').text();
+        if (_Total_ExtendedPrice == '') {
+            _Total_ExtendedPrice = 0.00;
+        }
+        _Total_ExtendedPrice = (+_Total_ExtendedPrice) - (+ExtPriceVIP);
+
+        $('#Total_ExtendedPrice').text(_Total_ExtendedPrice.toFixed(2));
+        var _Total_Amount = $('#Total_Amount').text();
+        if (_Total_Amount == '') {
+            _Total_Amount = 0.00;
+        }
+        _Total_Amount = (+_Total_Amount) - (+TaxAmount);
+        $('#Total_Amount').text(_Total_Amount.toFixed(2));
+    };
+</script>
+
+<script>
+    //<input class="tabel_text_box valid" id="ProductCode_0" name="Line[0].ProductCode" readonly="true" type="text" value="2112">
+    //<tr>
+    //                            <td><label name="Line.ProductCode" id="Line_ProductCode" value="789"></label></td>
+    //                            <td>3212</td>
+    //                            <td>Coca Cola 300 ML</td>
+    //                            <td><input class="tabel_text_box valid" id="OrderQty_1" name="Line[1].Qty" readonly="true" type="text" value="10"></td>
+    //                            <td><input class="tabel_text_box valid" id="OrderQty_1" name="Line[1].UOM" readonly="true" type="text" value="CASE 2"></td>
+    //                            <td><input class="tabel_text_box valid" id="UnitPrice_1" name="Line[1].UnitPrice" readonly="true" type="text" value="15"></td>
+    //                            <td><input class="tabel_text_box valid" id="PriceGP_1" name="Line[1].PriceGP" readonly="true" type="text" value="TestrgPG"></td>
+    //                            <td><input class="tabel_text_box valid" id="TaxPer_1" name="Line[1].TaxAmount" readonly="true" type="text" value="30"></td>
+    //                            <td><input class="tabel_text_box valid" id="ExtPrice_1" name="Line[1].ExtendedPrice" readonly="true" type="text" value="30"></td>
+    //                            <td><input class="tabel_text_box valid" id="Amount_1" name="Line[1].Amount" readonly="true" type="text" value="300"></td>
+
+    //                            <td><img src="~/AcxiomDesign/images/cancel.png"></td>
+    //                        </tr>
+    //id=\'chk' + seqNo + '\'
+
+    //testROw+='<td>2</td>';
+    //testROw+=' <td><input class="tabel_text_box valid" id="ProductCode_0" name="Line[0].ProductCode" readonly="true" type="text" value="2112">  </td>';
+    //testROw+='<td>P Name</td>';
+    //testROw+='<td><input class="tabel_text_box" data-val="true" data-val-number="The field Qty must be a number."';
+    //testROw+='data-val-required="The Qty field is required." id="OrderQty_0" name="Line[0].Qty"';
+    //testROw+='readonly="true" type="text" value="5"></td>';
+    //testROw+='<td><input class="tabel_text_box" id="UOM_0" name="Line[0].UOM" readonly="true" type="text" value="CASE"></td>';
+    //testROw+='<td><input class="tabel_text_box" id="UnitPrice_0" name="Line[0].UnitPrice" readonly="true" type="text" value="10"></td>';
+    //testROw+='<td><input class="tabel_text_box" id="PriceGP_0" name="Line[0].PriceGP" readonly="true" type="text" value="TestfLastPG"></td>';
+    //testROw+='<td><input class="tabel_text_box" id="TaxPer_0" name="Line[0].TaxAmount" readonly="true" type="text" value="30"></td>';
+    //testROw+='<td><input class="tabel_text_box" id="ExtPrice_0" name="Line[0].ExtendedPrice" readonly="true" type="text" value="30"></td>';
+    //testROw+='<td><input class="tabel_text_box" id="Amount_0" name="Line[0].Amount" readonly="true" type="text" value="300"></td>';
+    //testROw+='<td><img src="/AcxiomDesign/images/cancel.png"></td>';
+    //testROw += '</tr>';
+</script>

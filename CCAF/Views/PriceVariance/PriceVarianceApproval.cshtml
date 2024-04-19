@@ -1,0 +1,1233 @@
+﻿
+@model CCAF.Models.PVFormViewModel
+@using CCAF.Models;
+@{
+    ViewBag.Title = "Price Variance Approval";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@{
+    bool isapprove = false;
+    bool isreject = false;
+}
+<style type="text/css">
+  
+    .upload-image {
+        width: 28px;
+        margin-left: 7px;
+        margin-top: 3px
+    }
+    .wrapperbox {
+        background: #fff;
+        float: left;
+        width: 100%;
+        position: relative;
+    }
+
+    .for_PVCNumSeq {
+        font-size: 15px;
+        color: #e51635;
+        font-family: 'Montserrat', sans-serif;
+        float: right;
+        margin-right: 10px;
+    }
+    .for_AmountSign {
+        color: #e51635;
+        font-family: 'Montserrat', sans-serif;
+    }
+    .view-catalog-PVC {
+        float: left;
+        margin-top: 8px;
+        margin-left: 8px;
+    }
+
+    .table.order_table tr td:last-child {
+        text-align: center !important;
+    }
+
+    .for_PVCNumSeq {
+        font-size: 15px;
+        color: #e51635;
+        font-family: 'Montserrat', sans-serif;
+    }
+
+    .Actionbutton {
+        background: #fff;
+        color: #e51635;
+        display: inline-block;
+        border-radius: 5px;
+        font-family: 'Montserrat', sans-serif;
+        cursor: pointer;
+        border: 1px solid transparent;
+        transition: all 0.4s ease-in-out 0s;
+        -webkit-transition: all 0.4s ease-in-out 0s;
+        -moz-transition: all 0.4s ease-in-out 0s;
+        -o-transition: all 0.4s ease-in-out 0s;
+        outline: none;
+        font-size: 13px;
+        border: 1px solid transparent;
+    }
+
+    .btnSave_RequestChange {
+        background: #e51635;
+        color: #fff;
+        margin-top: 20px;
+        padding: 3px 16px 3px 16px;
+        border-radius: 5px;
+        font-family: 'Montserrat', sans-serif;
+        cursor: pointer;
+        float: right;
+        border: 1px solid transparent;
+        transition: all 0.4s ease-in-out 0s;
+        font-size: 13px;
+    }
+</style>
+
+<div class="loader_overlay">
+    <img src="~/AcxiomDesign/images/Loading-red.gif" id="loading" height="250px" width="250px" />
+</div>
+<div class="wrapperbox">
+    <div class="top-title">
+        <h2>Price Variance Form</h2>
+
+        <div style="margin-bottom:29px">
+            <span id="Pvnumber" class="for_PVCNumSeq">@Model.PVHeader.PVCNO</span><span class="for_PVCNumSeq"> PV No :-</span>
+
+        </div>
+
+    </div>
+    <div class="for-top-border">
+        <div class="container">
+            <div class="row">
+
+                <div class="col-lg-1 col-md-1 col-sm-4 col-xs-4 padding-zero mobileview-col-xs-4" style="margin-left: -17px">
+                    <div class="first_left_side mobileview-col-xs-6">
+                        <p>@Html.LabelFor(m => m.PVHeader.Entity)</p>
+                        <p>@Html.LabelFor(m => m.PVHeader.CustomerApplicable)</p>
+                        <p>@Html.LabelFor(m => m.PVHeader.AccountSelection)</p>
+                    </div>
+                </div>
+
+                <div class="col-xs-3 col-md-3 col-sm-3 col-xs-3 mobileview-col-xs-3">
+                    <div class="first_left_side for-float-right">
+                        @Html.TextBoxFor(m => m.PVHeader.Entity, new { style = "width:250px", @readonly = "true" })
+                        @Html.TextBoxFor(m => m.PVHeader.CustomerApplicable, new { style = "width:250px", @readonly = "true" })
+                        @Html.TextBoxFor(m => m.PVHeader.AccountSelection, new { style = "width:250px", @readonly = "true" })
+                    </div>
+                </div>
+
+
+
+                <div class="col-lg-1 col-md-1 col-sm-1 col-xs-8 padding-zero mobileview-col-xs-4">
+                    <div class="first_right_side">
+                        <p>@Html.LabelFor(m => m.PVHeader.Branch)</p>
+                        <p>@Html.Label("Start Date")</p>
+                        <p>@Html.Label("End Date")</p>
+                    </div>
+                </div>
+
+                <div class="col-xs-3 col-md-3 col-sm-3 col-xs-3 mobileview-col-xs-3">
+                    <div class="first_right_side">
+                        @Html.TextBoxFor(m => m.PVHeader.Branch, new { style = "width:250px", @readonly = "true" })
+                        @if (Model.PVLine.Count > 0)
+                        {
+                            @Html.TextBoxFor(m =>Model.PVLine[0].StartDate, new { @class = "flatpickr flatpickr-input active", @readonly = "true", @id = "StartDate", style = "width:200px" })
+                            @Html.TextBoxFor(m =>Model.PVLine[0].EndDate, new { @class = "flatpickr flatpickr-input active", @readonly = "true", @id = "EndDate", style = "width:200px" })
+                        }
+                        else
+                        {
+                            @Html.TextBox("StartDate", new { @class = "flatpickr flatpickr-input active", @readonly = "true", @id = "StartDate", style = "width:200px" })
+                          @Html.TextBox("EndDate", new { @class = "flatpickr flatpickr-input active", @readonly = "true", @id = "EndDate", style = "width:200px" })
+                        }
+                    </div>
+                </div>
+
+                <div class="col-lg-1 col-md-1 col-sm-1 col-xs-8 padding-zero mobileview-col-xs-4">
+                    <div class="first_right_side">
+                        <p>@Html.LabelFor(m => m.PVHeader.PriceTier)</p>
+                        <p>@Html.LabelFor(m => m.PVHeader.Description)</p>
+                    </div>
+                </div>
+
+                <div class="col-xs-3 col-md-3 col-sm-3 col-xs-3 mobileview-col-xs-3">
+                    <div class="first_right_side">
+                        @Html.TextBoxFor(m => m.PVHeader.PriceTier, new { style = "width:200px", @readonly = "true" })
+                        @Html.TextAreaFor(m => m.PVHeader.Description, new
+                   {
+                       @readonly = "true",
+                            @placeholder = "Free Text (Max 30 Characters)",
+                       @rows = "2",
+                       @cols = "25",
+                       @maxlength = "30",
+                       style = "width:200px;height: 55px;"
+                   })
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+ @if (Model.PVHeader.HeaderStatus == 2)// 2nd Approver screen
+{
+    <div class="left-side-bar for-order-margin">
+        <table id="PvcLinetbl" class="add-new-class table order_table order_table-right2 for-margin cell-border mobile_view_beforenone responsive-table">
+            <thead>
+                <tr>
+                    <th><input type="checkbox" id="chkBoxSelectAll"></th>
+                    <th>No</th>
+                    <th>Item Type</th>
+                    <th>Item Selection</th>
+                    <th>Item Name</th>
+                    <th>Current Price-VEP</th>
+                    <th>New Price(VEP)</th>
+                    <th>New Price(VIP)</th>
+                    <th>Discount</th>
+                    <th>%Discount</th>
+                    <th>Expected Volumn(PC)</th>
+                    <th><img src="/AcxiomDesign/images/right_icon.png" onclick="UpdateAllLineStatus('4')"></th>
+                    <th><img src="/AcxiomDesign/images/close_red.png" onclick="UpdateAllLineStatus('5')"></th>
+
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null)
+                {
+                    foreach (PVFLine d in Model.PVLine)
+                    {
+                <tr>
+                    @if (@d.ISAPPROVE == 0 || @d.ISAPPROVE == 1)
+                    {
+                        <td></td>
+                    }
+                    else
+                    {
+                        <td><input type="checkbox" class="singlechkbox" id="chkitemtfoot"></td>
+                    }
+
+                    <td>@d.No</td>
+                    <td>@d.ItemTypeDesc</td>
+                    <td>@d.ItemSelection</td>
+                    <td>@d.ItemName</td>
+                    <td><span class="for_AmountSign">$ </span>@d.CurrentPriceVEP</td>
+                    <td><span class="for_AmountSign">$ </span>@d.NewPriceVEP</td>
+                    <td><span class="for_AmountSign">$ </span>@d.NewPriceVIP</td>
+                    <td>@d.Discount</td>
+                    <td>@d.DiscountPer</td>
+                    <td>@d.ExpectedVolumn</td>
+                    @if (@d.ISAPPROVE == 0)
+                    {
+                        isapprove = true;
+                        <td><img src="/AcxiomDesign/images/right_icon.png"></td>
+
+                        <td></td>
+                    }
+                    else if (@d.ISAPPROVE == 1)
+                    {
+                        isreject = true;
+                        <td></td>
+                        <td><img src="/AcxiomDesign/images/close_red.png"></td>
+                    }
+                    else
+                    {
+                        isapprove = false;
+                        isreject = false;
+                        <td><img src="/AcxiomDesign/images/right_icon.png" onclick="UpdateLineStatus('4','@d.ItemSelection')"></td>
+                        <td><img src="/AcxiomDesign/images/close_red.png" onclick="UpdateLineStatus('5','@d.ItemSelection')"></td>
+                    }
+                </tr>
+
+                    }
+                }
+
+
+            </tbody>
+            <tfoot>
+            </tfoot>
+        </table>
+
+    </div>
+    <br>
+    <div class="for-top-border">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-1 col-md-1 col-sm-4 col-xs-4 padding-zero mobileview-col-xs-4" style="margin-left: -17px">
+                    <div class="first_left_side mobileview-col-xs-6">
+                        <p>Comments</p>
+                        <p>@Html.Label("1st Approver-")</p>
+                        <p>@Html.Label("2nd Approver-")</p>
+                        <p>@Html.Label("3rd Approver-")</p>
+                    </div>
+                </div>
+
+                <div class="col-xs-5 col-md-5 col-sm-3 col-xs-3 mobileview-col-xs-3">
+                    <div class="first_left_side for-float-right">
+                        <br>
+                        @Html.TextBoxFor(m => m.PVHeader.firstApproverComment, new { style = "width:250px", @readonly = "true" })
+                        @Html.TextBoxFor(m => m.PVHeader.secondApproverComment, new { style = "width:250px" })
+                        @Html.TextBoxFor(m => m.PVHeader.thirdApprovercomment, new { style = "width:250px", @readonly = "true" })
+                    </div>
+                </div>
+                <div class="col-xs-3 col-md-3 col-sm-3 col-xs-3 mobileview-col-xs-3">
+                </div>
+                <div class="col-xs-3 col-md-3 col-sm-3 col-xs-3 mobileview-col-xs-3">
+                    <button class="btnSave_RequestChange" type="submit" onclick="UpdateHeaderStatus('0','2')" id="btnsavePVC">Request for Change</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="for-bg-color">
+        <div class="container">
+            <div class="row">
+
+                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-16">
+                    <div class="middel-center">
+                        <p>Attachment :</p>
+                    </div>
+                    <div class="right-middel">
+                        @{
+                            for (int i = 0; i < Model.PVHeader.PvImages.Count(); i++)
+                            {
+                                string ext = Path.GetExtension(Model.PVHeader.PvImages[i].ImageUrl);
+                                if (ext.ToUpper() == ".PDF")
+                                {
+                                    <a class="img-show" href="@Model.PVHeader.PvImages[i].ImageUrl" value="@Model.PVHeader.PvImages[i].ImageUrl" target="_blank">
+                                        <img class="upload-image" src="~/AcxiomDesign/images/pdf image.jpg" />
+                                    </a>
+
+                                }
+                                else if (ext.ToUpper() == ".DOCX")
+                                {
+                                    <a class="img-show" href="@Model.PVHeader.PvImages[i].ImageUrl" value="@Model.PVHeader.PvImages[i].ImageUrl" target="_blank">
+
+                                        <img class="upload-image" src="~/AcxiomDesign/images/word.jpg" />
+                                    </a>
+
+                                }
+                                else if (ext.ToUpper() == ".JPG" || ext.ToUpper() == ".JPEG" || ext.ToUpper() == ".PNG")
+                                {
+                                    <a class="img-show" href="@Model.PVHeader.PvImages[i].ImageUrl" value="@Model.PVHeader.PvImages[i].ImageUrl" target="_blank">
+                                        <img class="upload-image" src="~/AcxiomDesign/images/jpg-image.jpg" />
+                                    </a>
+
+                                }
+                                else if (ext.ToUpper() == ".XLSX")
+                                {
+                                    <a class="img-show" href="@Model.PVHeader.PvImages[i].ImageUrl" value="@Model.PVHeader.PvImages[i].ImageUrl" target="_blank">
+
+                                        <img class="upload-image" src="~/AcxiomDesign/images/Excel image.jpg" />
+                                    </a>
+
+                                }
+
+                            }
+                        }
+                    </div>
+
+                </div>
+                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-16">
+                </div>
+                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 mobileview-col-xs-6 form-group-mobile">
+                    <div class="right-middel">
+                        <button style="margin-left: 20px; margin-bottom: 5px;" type="button" accesskey="A" onclick="UpdateHeaderStatus('3','0');">Escalate</button>
+                    </div>
+                    <div class="right-middel">
+                        @if (isreject && isapprove == false)
+                        {
+                            <button style="margin-left: 20px; margin-bottom: 5px;" type="button" id="btnReject" accesskey="A" onclick="UpdateHeaderStatus('2','5');">Reject</button>
+                        }
+                        else
+                        {<button style="margin-left: 20px; display: none; margin-bottom: 5px;" type="button" id="btnReject" accesskey="A" onclick="UpdateHeaderStatus('2','5');">Reject</button>}
+                    </div>
+                    <div class="right-middel">
+                        @if (isapprove && isreject == false)
+                        {
+                            <button style="margin-left: 20px;  margin-bottom: 5px;" type="button" accesskey="A" id="btnApprove" onclick="UpdateHeaderStatus('1','4');">Approve</button>
+                        }
+                        else
+                        {
+                            <button style="margin-left: 20px; display: none; margin-bottom: 5px;" type="button" accesskey="A" id="btnApprove" onclick="UpdateHeaderStatus('1','4');">Approve</button>
+                        }
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+}
+else if (Model.PVHeader.HeaderStatus == 4)// 3rd Approver
+{
+    <div class="left-side-bar for-order-margin">
+        <table id="PvcLinetbl" class="add-new-class table order_table order_table-right2 for-margin cell-border mobile_view_beforenone responsive-table">
+            <thead>
+                <tr>
+                    <th><input type="checkbox" id="chkBoxSelectAll"></th>
+                    <th>No</th>
+                    <th>Item Type</th>
+                    <th>Item Selection</th>
+                    <th>Item Name</th>
+                    <th>Current Price-VEP</th>
+                    <th>New Price(VEP)</th>
+                    <th>New Price(VIP)</th>
+                    <th>Discount</th>
+                    <th>%Discount</th>
+                    <th>Expected Volume(PC)</th>
+                    <th><img src="/AcxiomDesign/images/right_icon.png" onclick="UpdateAllLineStatus('6')"></th>
+                    <th><img src="/AcxiomDesign/images/close_red.png" onclick="UpdateAllLineStatus('7')"></th>
+
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null)
+                {
+                    foreach (PVFLine d in Model.PVLine)
+                    {
+                <tr>
+                    @if (@d.ISAPPROVE == 0 || @d.ISAPPROVE == 1)
+                    {
+                        <td></td>
+                    }
+                    else
+                    {
+                        <td><input type="checkbox" class="singlechkbox" id="chkitemtfoot"></td>
+                    }
+
+                    <td>@d.No</td>
+                    <td>@d.ItemTypeDesc</td>
+                    <td>@d.ItemSelection</td>
+                    <td>@d.ItemName</td>
+                    <td><span class="for_AmountSign">$ </span>@d.CurrentPriceVEP</td>
+                    <td><span class="for_AmountSign">$ </span>@d.NewPriceVEP</td>
+                    <td><span class="for_AmountSign">$ </span>@d.NewPriceVIP</td>
+                    <td>@d.Discount</td>
+                    <td>@d.DiscountPer</td>
+                    <td>@d.ExpectedVolumn</td>
+                    @if (@d.ISAPPROVE == 0)
+                    {
+                        isapprove = true;
+                        <td><img src="/AcxiomDesign/images/right_icon.png"></td>
+
+                        <td></td>
+                    }
+                    else if (@d.ISAPPROVE == 1)
+                    {
+                        isreject = true;
+                        <td></td>
+                        <td><img src="/AcxiomDesign/images/close_red.png"></td>
+                    }
+                    else
+                    {
+                        <td><img src="/AcxiomDesign/images/right_icon.png" onclick="UpdateLineStatus('6','@d.ItemSelection')"></td>
+                        <td><img src="/AcxiomDesign/images/close_red.png" onclick="UpdateLineStatus('7','@d.ItemSelection')"></td>
+                    }
+                </tr>
+
+                    }
+                }
+
+
+            </tbody>
+            <tfoot>
+            </tfoot>
+        </table>
+
+    </div>
+    <br>
+    <div class="for-top-border">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-1 col-md-1 col-sm-4 col-xs-4 padding-zero mobileview-col-xs-4" style="margin-left: -17px">
+                    <div class="first_left_side mobileview-col-xs-6">
+                        <p>Comments</p>
+                        <p>@Html.Label("1st Approver-")</p>
+                        <p>@Html.Label("2nd Approver-")</p>
+                        <p>@Html.Label("3rd Approver-")</p>
+                    </div>
+                </div>
+
+                <div class="col-xs-5 col-md-5 col-sm-3 col-xs-3 mobileview-col-xs-3">
+                    <div class="first_left_side for-float-right">
+                        <br>
+                        @Html.TextBoxFor(m => m.PVHeader.firstApproverComment, new { style = "width:250px", @readonly = "true" })
+                        @Html.TextBoxFor(m => m.PVHeader.secondApproverComment, new { style = "width:250px", @readonly = "true" })
+                        @Html.TextBoxFor(m => m.PVHeader.thirdApprovercomment, new { style = "width:250px" })
+                    </div>
+                </div>
+                <div class="col-xs-3 col-md-3 col-sm-3 col-xs-3 mobileview-col-xs-3">
+                </div>
+                <div class="col-xs-3 col-md-3 col-sm-3 col-xs-3 mobileview-col-xs-3">
+                    <button class="btnSave_RequestChange" type="submit" onclick="UpdateHeaderStatus('0','3')" id="btnsavePVC">Request for Change</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="for-bg-color">
+        <div class="container">
+            <div class="row">
+
+                <div class="col-lg-3 col-md-4 col-sm-4 col-xs-16">
+                    <div class="middel-center">
+                        <p>Attachment :</p>
+                    </div>
+
+                    <div class="right-middel">
+                        @{
+                            for (int i = 0; i < Model.PVHeader.PvImages.Count(); i++)
+                            {
+                                string ext = Path.GetExtension(Model.PVHeader.PvImages[i].ImageUrl);
+                                if (ext.ToUpper() == ".PDF")
+                                {
+                                    <a class="img-show" href="@Model.PVHeader.PvImages[i].ImageUrl" value="@Model.PVHeader.PvImages[i].ImageUrl" target="_blank">
+                                        <img class="upload-image" src="~/AcxiomDesign/images/pdf image.jpg" />
+                                    </a>
+
+                                }
+                                else if (ext.ToUpper() == ".DOCX")
+                                {
+                                    <a class="img-show" href="@Model.PVHeader.PvImages[i].ImageUrl" value="@Model.PVHeader.PvImages[i].ImageUrl" target="_blank">
+
+                                        <img class="upload-image"  src="~/AcxiomDesign/images/word.jpg" />
+                                    </a>
+
+                                }
+                                else if (ext.ToUpper() == ".JPG" || ext.ToUpper() == ".JPEG" || ext.ToUpper() == ".PNG")
+                                {
+                                    <a class="img-show" href="@Model.PVHeader.PvImages[i].ImageUrl" value="@Model.PVHeader.PvImages[i].ImageUrl" target="_blank">
+                                        <img class="upload-image" src="~/AcxiomDesign/images/jpg-image.jpg" />
+                                    </a>
+
+                                }
+                                else if (ext.ToUpper() == ".XLSX")
+                                {
+                                    <a class="img-show" href="@Model.PVHeader.PvImages[i].ImageUrl" value="@Model.PVHeader.PvImages[i].ImageUrl" target="_blank">
+
+                                        <img class="upload-image" src="~/AcxiomDesign/images/Excel image.jpg" />
+                                    </a>
+
+                                }
+
+                            }
+                        }
+                    </div>
+
+
+                </div>
+                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-16">
+                </div>
+                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 mobileview-col-xs-6 form-group-mobile">
+
+                    <div class="right-middel">
+                        @if (isreject && isapprove == false)
+                        {
+                            <button style="margin-left: 20px; margin-bottom: 5px;" type="button" id="btnReject" accesskey="A" onclick="UpdateHeaderStatus('2','7');">Reject</button>
+                        }
+                        else
+                        {<button style="margin-left: 20px; display: none; margin-bottom: 5px;" type="button" id="btnReject" accesskey="A" onclick="UpdateHeaderStatus('2','7');">Reject</button>}
+                    </div>
+                    <div class="right-middel">
+                        @if (isapprove && isreject == false)
+                        {
+                            <button style="margin-left: 20px;  margin-bottom: 5px;" type="button" accesskey="A" id="btnApprove" onclick="UpdateHeaderStatus('1','6');">Approve</button>
+                        }
+                        else
+                        {
+                            <button style="margin-left: 20px; display: none; margin-bottom: 5px;" type="button" accesskey="A" id="btnApprove" onclick="UpdateHeaderStatus('1','6');">Approve</button>
+                        }
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else if (Model.PVHeader.HeaderStatus == 6)
+{
+    <div class="left-side-bar for-order-margin">
+        <table id="PvcLinetbl" class="add-new-class table order_table order_table-right2 for-margin cell-border mobile_view_beforenone responsive-table">
+            <thead>
+                <tr>
+                    <th><input type="checkbox" id="chkBoxSelectAll"></th>
+                    <th>No</th>
+                    <th>Item Type</th>
+                    <th>Item Selection</th>
+                    <th>Item Name</th>
+                    <th>Current Price-VEP</th>
+                    <th>New Price(VEP)</th>
+                    <th>New Price(VIP)</th>
+                    <th>Discount</th>
+                    <th>%Discount</th>
+                    <th>Expected Volumn(PC)</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null)
+                {
+                    foreach (PVFLine d in Model.PVLine)
+                    {
+                <tr>
+
+                    <td></td>
+                    <td>@d.No</td>
+                    <td>@d.ItemTypeDesc</td>
+                    <td>@d.ItemSelection</td>
+                    <td>@d.ItemName</td>
+                    <td><span class="for_AmountSign">$ </span>@d.CurrentPriceVEP</td>
+                    <td><span class="for_AmountSign">$ </span>@d.NewPriceVEP</td>
+                    <td><span class="for_AmountSign">$ </span>@d.NewPriceVIP</td>
+                    <td>@d.Discount</td>
+                    <td>@d.DiscountPer</td>
+                    <td>@d.ExpectedVolumn</td>
+                </tr>
+
+                    }
+                }
+
+
+            </tbody>
+            <tfoot>
+            </tfoot>
+        </table>
+
+    </div>
+    <br>
+    <div class="for-top-border">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-1 col-md-1 col-sm-4 col-xs-4 padding-zero mobileview-col-xs-4" style="margin-left: -17px">
+                    <div class="first_left_side mobileview-col-xs-6">
+                        <p>Comments</p>
+                        <p>@Html.Label("1st Approver-")</p>
+                        <p>@Html.Label("2nd Approver-")</p>
+                        <p>@Html.Label("3rd Approver-")</p>
+                    </div>
+                </div>
+
+                <div class="col-xs-5 col-md-5 col-sm-3 col-xs-3 mobileview-col-xs-3">
+                    <div class="first_left_side for-float-right">
+                        <br>
+                        @Html.TextBoxFor(m => m.PVHeader.firstApproverComment, new { style = "width:250px", @readonly = "true" })
+                        @Html.TextBoxFor(m => m.PVHeader.secondApproverComment, new { style = "width:250px", @readonly = "true" })
+                        @Html.TextBoxFor(m => m.PVHeader.thirdApprovercomment, new { style = "width:250px", @readonly = "true" })
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="for-bg-color">
+        <div class="container">
+            <div class="row">
+
+                <div class="col-lg-3 col-md-4 col-sm-4 col-xs-16">
+                    <div class="middel-center">
+                        <p>Attachment :</p>
+                    </div>
+                    <div class="right-middel">
+                        @{
+                            for (int i = 0; i < Model.PVHeader.PvImages.Count(); i++)
+                            {
+                                string ext = Path.GetExtension(Model.PVHeader.PvImages[i].ImageUrl);
+                                if (ext.ToUpper() == ".PDF")
+                                {
+                                    <a class="img-show" href="@Model.PVHeader.PvImages[i].ImageUrl" value="@Model.PVHeader.PvImages[i].ImageUrl" target="_blank">
+                                        <img class="upload-image" src="~/AcxiomDesign/images/pdf image.jpg" />
+                                    </a>
+
+                                }
+                                else if (ext.ToUpper() == ".DOCX")
+                                {
+                                    <a class="img-show" href="@Model.PVHeader.PvImages[i].ImageUrl" value="@Model.PVHeader.PvImages[i].ImageUrl" target="_blank">
+
+                                        <img class="upload-image" src="~/AcxiomDesign/images/word.jpg" />
+                                    </a>
+
+                                }
+                                else if (ext.ToUpper() == ".JPG" || ext.ToUpper() == ".JPEG" || ext.ToUpper() == ".PNG")
+                                {
+                                    <a class="img-show" href="@Model.PVHeader.PvImages[i].ImageUrl" value="@Model.PVHeader.PvImages[i].ImageUrl" target="_blank">
+                                        <img class="upload-image" src="~/AcxiomDesign/images/jpg-image.jpg" />
+                                    </a>
+
+                                }
+                                else if (ext.ToUpper() == ".XLSX")
+                                {
+                                    <a class="img-show" href="@Model.PVHeader.PvImages[i].ImageUrl" value="@Model.PVHeader.PvImages[i].ImageUrl" target="_blank">
+
+                                        <img class="upload-image" src="~/AcxiomDesign/images/Excel image.jpg" />
+                                    </a>
+
+                                }
+
+                            }
+                        }
+                    </div>
+
+                </div>
+                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-16">
+
+
+                    <div class="right-middel">
+                        <button style="margin-left: 20px; display: none; margin-bottom: 5px;" type="button" id="btnSyncItemSelection" accesskey="A" onclick="UpdateHeaderStatus('2','7');">Sync Item Selection</button>
+                    </div>
+                    <div class="right-middel">
+
+                        <button style="margin-left: 20px; display: none; margin-bottom: 5px;" type="button" accesskey="A" id="btnSyncAccountSelection" onclick="UpdateHeaderStatus('1','6');">Sync Account Selection</button>
+
+                    </div>
+
+
+                </div>
+                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 mobileview-col-xs-6 form-group-mobile">
+
+                    <div class="right-middel">
+
+                        <button style="margin-left: 20px;  margin-bottom: 5px;" type="button" accesskey="A" id="btnRelease" onclick="ReleaseData();">Release</button>
+
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else if (Model.PVHeader.HeaderStatus == 8)
+{
+    <div class="left-side-bar for-order-margin">
+        <table id="PvcLinetbl" class="add-new-class table order_table order_table-right2 for-margin cell-border mobile_view_beforenone responsive-table">
+            <thead>
+                <tr>
+                    <th><input type="checkbox" id="chkBoxSelectAll"></th>
+                    <th>No</th>
+                    <th>Item Type</th>
+                    <th>Item Selection</th>
+                    <th>Item Name</th>
+                    <th>Current Price-VEP</th>
+                    <th>New Price(VEP)</th>
+                    <th>New Price(VIP)</th>
+                    <th>Discount</th>
+                    <th>%Discount</th>
+                    <th>Expected Volumn(PC)</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null)
+                {
+                    foreach (PVFLine d in Model.PVLine)
+                    {
+                <tr>
+
+                    <td></td>
+                    <td>@d.No</td>
+                    <td>@d.ItemTypeDesc</td>
+                    <td>@d.ItemSelection</td>
+                    <td>@d.ItemName</td>
+                    <td><span class="for_AmountSign">$ </span>@d.CurrentPriceVEP</td>
+                    <td><span class="for_AmountSign">$ </span>@d.NewPriceVEP</td>
+                    <td><span class="for_AmountSign">$ </span>@d.NewPriceVIP</td>
+                    <td>@d.Discount</td>
+                    <td>@d.DiscountPer</td>
+                    <td>@d.ExpectedVolumn</td>
+                </tr>
+
+                    }
+                }
+
+
+            </tbody>
+            <tfoot>
+            </tfoot>
+        </table>
+
+    </div>
+    <br>
+    <div class="for-top-border">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-1 col-md-1 col-sm-4 col-xs-4 padding-zero mobileview-col-xs-4" style="margin-left: -17px">
+                    <div class="first_left_side mobileview-col-xs-6">
+                        <p>Comments</p>
+                        <p>@Html.Label("1st Approver-")</p>
+                        <p>@Html.Label("2nd Approver-")</p>
+                        <p>@Html.Label("3rd Approver-")</p>
+                    </div>
+                </div>
+
+                <div class="col-xs-5 col-md-5 col-sm-3 col-xs-3 mobileview-col-xs-3">
+                    <div class="first_left_side for-float-right">
+                        <br>
+                        @Html.TextBoxFor(m => m.PVHeader.firstApproverComment, new { style = "width:250px", @readonly = "true" })
+                        @Html.TextBoxFor(m => m.PVHeader.secondApproverComment, new { style = "width:250px", @readonly = "true" })
+                        @Html.TextBoxFor(m => m.PVHeader.thirdApprovercomment, new { style = "width:250px", @readonly = "true" })
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="for-bg-color">
+        <div class="container">
+            <div class="row">
+
+                <div class="col-lg-3 col-md-4 col-sm-4 col-xs-16">
+                    <div class="middel-center">
+                        <p>Attachment :</p>
+                    </div>
+                    <div class="right-middel">
+                        @{
+                            for (int i = 0; i < Model.PVHeader.PvImages.Count(); i++)
+                            {
+                                string ext = Path.GetExtension(Model.PVHeader.PvImages[i].ImageUrl);
+                                if (ext.ToUpper() == ".PDF")
+                                {
+                                    <a class="img-show" href="@Model.PVHeader.PvImages[i].ImageUrl" value="@Model.PVHeader.PvImages[i].ImageUrl" target="_blank">
+                                        <img class="upload-image" src="~/AcxiomDesign/images/pdf image.jpg" />
+                                    </a>
+
+                                }
+                                else if (ext.ToUpper() == ".DOCX")
+                                {
+                                    <a class="img-show" href="@Model.PVHeader.PvImages[i].ImageUrl" value="@Model.PVHeader.PvImages[i].ImageUrl" target="_blank">
+
+                                        <img class="upload-image" src="~/AcxiomDesign/images/word.jpg" />
+                                    </a>
+
+                                }
+                                else if (ext.ToUpper() == ".JPG" || ext.ToUpper() == ".JPEG" || ext.ToUpper() == ".PNG")
+                                {
+                                    <a class="img-show" href="@Model.PVHeader.PvImages[i].ImageUrl" value="@Model.PVHeader.PvImages[i].ImageUrl" target="_blank">
+                                        <img class="upload-image" src="~/AcxiomDesign/images/jpg-image.jpg" />
+                                    </a>
+
+                                }
+                                else if (ext.ToUpper() == ".XLSX")
+                                {
+                                    <a class="img-show" href="@Model.PVHeader.PvImages[i].ImageUrl" value="@Model.PVHeader.PvImages[i].ImageUrl" target="_blank">
+
+                                        <img class="upload-image" src="~/AcxiomDesign/images/Excel image.jpg" />
+                                    </a>
+
+                                }
+
+                            }
+                        }
+                    </div>
+
+                </div>
+             
+            </div>
+        </div>
+    </div>
+}
+
+
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $('#EndDate').prop('disabled', true);
+        $('#StartDate').prop('disabled', true);
+        var $selectAll = $('#chkBoxSelectAll'); // main checkbox inside table thead
+
+        $selectAll.on('click', function () {
+
+            $('.singlechkbox').prop('checked', this.checked);
+        });
+
+
+    });
+
+    function Validate() {
+        var startDate = document.getElementById("StartDate").value;
+        var endDate = document.getElementById("EndDate").value;
+        if (startDate == '') {
+            ShowMessage('Please Pick a "From Date"!');
+            return false;
+        }
+        else if (endDate == '') {
+            ShowMessage('Please Pick a "To Date"!');
+            return false;
+        }
+
+        else if ((Date.parse(startDate) > Date.parse(endDate))) {
+            ShowMessage('"To Date" should be greater than "From Date"!');
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+
+    function UpdateLineStatus(UpdateType, ItemCode) {
+        var pvcnumber = $('#Pvnumber').text();
+        var entityId = $('#PVHeader_Entity').val();
+
+        if (entityId == "") {
+            ShowMessage('Please Select the Entity');
+            return false;
+        }
+        else if (pvcnumber == "") {
+            ShowMessage('PV No is blank!Please refresh the window');
+            return false;
+        }
+        else {
+            $.ajax({
+                type: "POST",
+                crossDomain: true,
+                dataType: 'json',
+                url: '/PriceVariance/PVCApproverLineAction?PVCNUM=' + pvcnumber + '&Entityid=' + entityId + '&ActionType=' + UpdateType + '&ItemCode=' + ItemCode + '',
+                success: function (responsedata) {
+                    debugger;
+                    if (responsedata.success) {
+                        $('#PvcLinetbl tbody').empty();
+                        var jsondata = JSON.parse(responsedata.data);
+                        var isapprove = false;
+                        var isreject = false;
+                        $.each(jsondata, function (index, obj) {
+
+                            var ImgApprove = "";
+                            var ImgReject = "";
+                            var checkbox = "";
+                            if (obj.ISAPPROVE == 0) {
+
+                                isapprove = true;
+
+                                ImgApprove = '<img src="/AcxiomDesign/images/right_icon.png">';
+                            }
+                            else if (obj.ISAPPROVE == 1) {
+                                isreject = true;
+                                ImgReject = '<img src="/AcxiomDesign/images/close_red.png">';
+                            }
+                            else {
+                                isreject = false;
+                                isapprove = false;
+                                checkbox = '<input type="checkbox" class="singlechkbox" id="chkitemtfoot"></input>';
+                                ImgApprove = '<img src="/AcxiomDesign/images/right_icon.png" onclick="UpdateLineStatus(4,\'' + obj.ItemSelection + '\')">';
+                                ImgReject = '<img src="/AcxiomDesign/images/close_red.png" onclick="UpdateLineStatus(5,\'' + obj.ItemSelection + '\')">';
+                            }
+
+                            var newRow = '<tr><td>' + checkbox + '</td><td>' + obj.No + '</td><td>' + obj.ItemTypeDesc + '</td><td>' + obj.ItemSelection + '</td><td>' + obj.ItemName + '</td><td><span class="for_AmountSign">$ </span>' + obj.CurrentPriceVEP + '</td><td><span class="for_AmountSign">$ </span>' + obj.NewPriceVEP + '</td>';
+                            newRow = newRow + '<td><span class="for_AmountSign">$ </span>' + obj.NewPriceVIP + '</td><td>' + obj.Discount + '</td><td>' + obj.DiscountPer + '</td><td>' + obj.ExpectedVolumn + '</td>';
+                            newRow = newRow + '<td>' + ImgApprove + '</td><td>' + ImgReject + '</td></tr>';
+                            $('#PvcLinetbl tbody').append(newRow);
+
+                            if (isapprove && isreject == false) {
+                                $("#btnReject").css({ display: "none" });
+                                $("#btnApprove").css({ display: "block" });
+                            }
+                            else { $("#btnApprove").css({ display: "none" }); }
+                            if (isreject && isapprove == false) {
+                                $("#btnReject").css({ display: "block" });
+                                $("#btnApprove").css({ display: "none" });
+                            }
+                            else { $("#btnReject").css({ display: "none" }); }
+                        });
+                    }
+                    else {
+                        ShowMessage(jsondata.data);
+                    }
+
+                }
+            });
+
+        }
+    }
+
+
+    function UpdateAllLineStatus(UpdateType) {
+        debugger;
+        var itemCode = $("#PvcLinetbl tbody tr:has(input:checked)").map(function () {
+            var $tr = $(this);
+            var ItemCode = $tr.find("td:nth-child(4)").text();
+            return ItemCode;
+        }).toArray();
+        var pvcnumber = $('#Pvnumber').text();
+        var entityId = $('#PVHeader_Entity').val();
+        if (itemCode.length <= 0) {
+            ShowMessage("Please Select the Line To remove");
+            return false;
+        }
+
+        if (entityId == "") {
+            ShowMessage('Please Select the Entity');
+            return false;
+        }
+        else if (pvcnumber == "") {
+            ShowMessage('PV No is blank!Please refresh the window');
+            return false;
+        }
+        else {
+            $.ajax({
+                type: "POST",
+                crossDomain: true,
+                dataType: 'json',
+                url: '/PriceVariance/PVCApproverLineAction?PVCNUM=' + pvcnumber + '&Entityid=' + entityId + '&ActionType=' + UpdateType + '&ItemCode=' + itemCode + '',
+                success: function (responsedata) {
+                    debugger;
+                    if (responsedata.success) {
+                        $('#PvcLinetbl tbody').empty();
+                        var jsondata = JSON.parse(responsedata.data);
+                        var isapprove = false;
+                        var isreject = false;
+                        $.each(jsondata, function (index, obj) {
+                            var ImgApprove = "";
+                            var ImgReject = "";
+                            var checkbox = "";
+                            if (obj.ISAPPROVE == 0) {
+
+                                isapprove = true;
+
+                                ImgApprove = '<img src="/AcxiomDesign/images/right_icon.png">';
+                            }
+                            else if (obj.ISAPPROVE == 1) {
+                                isreject = true;
+
+                                ImgReject = '<img src="/AcxiomDesign/images/close_red.png">';
+                            }
+                            else {
+                                isreject = false;
+                                isapprove = false;
+
+                                checkbox = '<input type="checkbox" class="singlechkbox" id="chkitemtfoot"></input>';
+                                ImgApprove = '<img src="/AcxiomDesign/images/right_icon.png" onclick="UpdateLineStatus(4,\'' + obj.ItemSelection + '\')">';
+                                ImgReject = '<img src="/AcxiomDesign/images/close_red.png" onclick="UpdateLineStatus(5,\'' + obj.ItemSelection + '\')">';
+                            }
+
+                            var newRow = '<tr><td>' + checkbox + '</td><td>' + obj.No + '</td><td>' + obj.ItemTypeDesc + '</td><td>' + obj.ItemSelection + '</td><td>' + obj.ItemName + '</td><td><span class="for_AmountSign">$ </span>' + obj.CurrentPriceVEP + '</td><td><span class="for_AmountSign">$ </span>' + obj.NewPriceVEP + '</td>';
+                            newRow = newRow + '<td><span class="for_AmountSign">$ </span>' + obj.NewPriceVIP + '</td><td>' + obj.Discount + '</td><td>' + obj.DiscountPer + '</td><td>' + obj.ExpectedVolumn + '</td>';
+                            newRow = newRow + '<td>' + ImgApprove + '</td><td>' + ImgReject + '</td></tr>';
+
+                            $('#PvcLinetbl tbody').append(newRow);
+                            if (isapprove && isreject == false) {
+                                $("#btnReject").css({ display: "none" });
+                                $("#btnApprove").css({ display: "block" });
+                            }
+                            else { $("#btnApprove").css({ display: "none" }); }
+                            if (isreject && isapprove == false) {
+                                $("#btnReject").css({ display: "block" });
+                                $("#btnApprove").css({ display: "none" });
+                            }
+                            else { $("#btnReject").css({ display: "none" }); }
+
+                        });
+                    }
+                    else {
+                        ShowMessage(jsondata.data);
+                    }
+
+                }
+            });
+
+        }
+    }
+
+    function UpdateHeaderStatus(UpdateType, status)
+    {
+
+        var pvcnumber = $('#Pvnumber').text();
+        var entityId = $('#PVHeader_Entity').val();
+        var approvercmmt = "";
+
+        if (UpdateType == "0" && status == "2")
+        {
+            approvercmmt = $('#PVHeader_secondApproverComment').val();
+            if (approvercmmt == "") {
+                ShowMessage("Please Enter the 2nd Approver Comment");
+                return false;
+            }
+
+        }
+      if (UpdateType == "0" && status == "3")
+        {
+            approvercmmt = $('#PVHeader_thirdApprovercomment').val();
+            if (approvercmmt == "") {
+                ShowMessage("Please Enter the 3rd Approver Comment");
+                return false;
+            }
+
+        }
+        if (UpdateType == "3" && status == "0")
+        {
+            approvercmmt = $('#PVHeader_secondApproverComment').val();
+            if (approvercmmt == "")
+            {
+                ShowMessage("Please Enter the 2nd Approver Comment");
+                return false;
+            }
+        }
+        if (UpdateType == "1" && status == "4")
+        {
+
+            approvercmmt = $('#PVHeader_secondApproverComment').val();
+            if (approvercmmt == "") {
+                ShowMessage("Please Enter the 2nd Approver Comment");
+                return false;
+            }
+        }
+        else if (UpdateType == "1" && status == "6")
+        {
+            approvercmmt = $('#PVHeader_thirdApprovercomment').val();
+            if (approvercmmt == "") {
+                ShowMessage("Please Enter the third Approver Comment");
+                return false;
+            }
+        }
+        if (entityId == "") {
+            ShowMessage('Please Select the Entity');
+            return false;
+        }
+        else if (pvcnumber == "") {
+            ShowMessage('PV No is blank!Please refresh the window');
+            return false;
+        }
+        else {
+            $.ajax({
+                type: "POST",
+                crossDomain: true,
+                dataType: 'json',
+                url: '/PriceVariance/PVCApproverHeaderAction?PVCNUM=' + pvcnumber + '&Entityid=' + entityId + '&ActionType=' + UpdateType + '&Status=' + status + '&Approvercmmt=' + approvercmmt + '',
+                success: function (responsedata) {
+                    debugger;
+                    if (responsedata.success) {
+
+                        var jsondata = JSON.parse(responsedata.data);
+                        if (status == '4')
+                        {
+                            ShowMessage("Price Variance form Approved successfully")
+                            setInterval(
+                                function () {
+                                    var url = '/PriceVariance/PVFormHistory';
+                                    window.location.href = url;
+                                },
+                                2000
+                            );;
+
+                        }
+                        else if (status == '6') {
+                            ShowMessage("Price variance form is Approved Successfully")
+                            setInterval(
+                                function () {
+                                    var url = '/PriceVariance/PVFormHistory';
+                                    window.location.href = url;
+                                },
+                                2000
+                            );
+
+                        }
+                        else if (UpdateType == '3')
+                        {
+                            ShowMessage("Price variance form escalated successfully")
+                            setInterval(
+                                function () {
+                                    var url = '/PriceVariance/PVFormHistory';
+                                    window.location.href = url;
+                                },
+                                2000
+                            );
+                        }
+                        else if (UpdateType == '0') {
+                            ShowMessage("Request for change raised successfully")
+                            setInterval(
+                                function () {
+                                    var url = '/PriceVariance/PVFormHistory';
+                                    window.location.href = url;
+                                },
+                                2000
+                            );
+
+                        }
+                        else if (status == '5') {
+                            ShowMessage("Price variance form is Reject Successfully")
+                            setInterval(
+                                function () {
+                                    var url = '/PriceVariance/PVFormHistory';
+                                    window.location.href = url;
+                                },
+                                2000
+                            );
+
+                        }
+                        else if (status == '7') {
+                            ShowMessage("Price variance form is Reject Successfully")
+                            setInterval(
+                                function () {
+                                    var url = '/PriceVariance/PVFormHistory';
+                                    window.location.href = url;
+                                },
+                                2000
+                            );
+
+                        }
+                    }
+                    else {
+                        ShowMessage(responsedata.data);
+                    }
+
+                }
+            });
+
+        }
+    }
+
+    function ViewImage() {
+
+    }
+
+    function ReleaseData()
+    {
+        var pvcnumber = $('#Pvnumber').text();
+        if (pvcnumber == "") {
+            ShowMessage('PV No is blank!Please refresh the window');
+            return false;
+        }
+        else {
+            $('.loader_overlay, #loading').show();
+            $.ajax({
+                type: "POST",
+                crossDomain: true,
+                dataType: 'json',
+                url: '/PriceVariance/PVCSendReleaseData?PVCNUM=' + pvcnumber + '',
+                success: function (responsedata)
+                {
+                    $('#loading').hide();
+                    $('.loader_overlay').fadeOut();
+                    if (responsedata.success)
+                    {
+                       
+                        ShowMessage(responsedata.responseText);
+                    setInterval(
+                            function () {
+                                var url = '/PriceVariance/PVFormHistory';
+                                window.location.href = url;
+                            },
+                            2000
+                        );
+                     
+
+
+                    }
+                    else
+                    {
+                        ShowMessage(responsedata.responseText);
+                    }
+
+                },
+                complete: function () {
+                    $('#loading').hide();
+                    $('.loader_overlay').fadeOut();
+                }
+            });
+
+        }
+    }
+
+</script>
+
+

@@ -1,0 +1,2031 @@
+﻿@model CCAF.Models.PVFormViewModel
+@using CCAF.Models
+@{
+    ViewBag.Title = "PriceVariance";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    PVFHeader _pvheader = (PVFHeader)Model.PVHeader;
+}
+@{
+    bool isapprove = false;
+    bool isreject = false;
+    bool isdatecheck = false;
+}
+<style type="text/css">
+    table.table.order_table.order_table-right2 tr th:nth-child(8) {
+       text-align: left; 
+    }
+    .upload-image {
+        width: 28px;
+        margin-left: 7px;
+        margin-top: 3px
+    }
+
+    .wrapperbox {
+        background: #fff;
+        float: left;
+        width: 100%;
+        position: relative;
+    }
+
+    .btnSave_RequestChange {
+        background: #e51635;
+        color: #fff;
+        margin-top: 20px;
+        padding: 3px 16px 3px 16px;
+        border-radius: 5px;
+        font-family: 'Montserrat', sans-serif;
+        cursor: pointer;
+        float: right;
+        border: 1px solid transparent;
+        transition: all 0.4s ease-in-out 0s;
+        font-size: 13px;
+    }
+
+    .btnSave_pvc {
+        background: #e51635;
+        color: #fff;
+        margin-right: 20px;
+        padding: 3px 16px 3px 16px;
+        border-radius: 5px;
+        font-family: 'Montserrat', sans-serif;
+        cursor: pointer;
+        float: right;
+        border: 1px solid transparent;
+        transition: all 0.4s ease-in-out 0s;
+        font-size: 13px;
+    }
+
+    .view-catalog-PVC {
+        float: left;
+        margin-top: 8px;
+        margin-left: 8px;
+    }
+
+    .table.order_table tr td:last-child {
+        text-align: center !important;
+    }
+
+    .for_PVCNumSeq {
+        font-size: 15px;
+        color: #e51635;
+        font-family: 'Montserrat', sans-serif;
+        float: right;
+        margin-right: 10px;
+    }
+    .for_AmountSign {
+        color: #e51635;
+        font-family: 'Montserrat', sans-serif;
+    }
+    .Actionbutton {
+        background: #fff;
+        color: #e51635;
+        display: inline-block;
+        border-radius: 5px;
+        font-family: 'Montserrat', sans-serif;
+        cursor: pointer;
+        border: 1px solid transparent;
+        transition: all 0.4s ease-in-out 0s;
+        -webkit-transition: all 0.4s ease-in-out 0s;
+        -moz-transition: all 0.4s ease-in-out 0s;
+        -o-transition: all 0.4s ease-in-out 0s;
+        outline: none;
+        font-size: 13px;
+        border: 1px solid transparent;
+    }
+</style>
+
+<div class="loader_overlay">
+    <img src="~/AcxiomDesign/images/Loading-red.gif" id="loading" height="250px" width="250px" />
+</div>
+
+
+
+
+<div>
+    @*<button type="button" onclick="showLoader();" disabled id="btnaccselection">Selection</button>&nbsp;*@
+</div>
+@if (Model.PVHeader.HeaderStatus == 0|| Model.PVHeader.HeaderStatus == 10)
+{
+
+    <div class="wrapperbox">
+        <div class="top-title">
+            <h2>Price Variance Form</h2>
+
+
+            <div style="margin-bottom:29px">
+                @if (!string.IsNullOrEmpty(ViewBag.PVCNUMSEQ))
+                {
+                <button class="btnSave_pvc" type="submit" onclick="UpdatePVCData()" id="btnUpdatePVC">Update</button>
+                }
+                else
+                {<button class="btnSave_pvc" type="submit" onclick="SavePVCData()" id="btnUpdatePVC">Save</button> }
+                <span id="Pvnumber" class="for_PVCNumSeq">@ViewBag.PVCNUMSEQ</span><span class="for_PVCNumSeq"> PV No :-</span>
+
+            </div>
+
+
+        </div>
+
+        <div class="for-top-border">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-1 col-md-1 col-sm-4 col-xs-4 padding-zero mobileview-col-xs-4" style="margin-left: -17px">
+                        <div class="first_left_side mobileview-col-xs-6">
+                            <p>@Html.LabelFor(m => m.PVHeader.Entity)</p>
+                            <p>@Html.LabelFor(m => m.PVHeader.CustomerApplicable)</p>
+                            <p>@Html.LabelFor(m => m.PVHeader.AccountSelection)</p>
+                        </div>
+                    </div>
+
+                    <div class="col-xs-3 col-md-3 col-sm-3 col-xs-3 mobileview-col-xs-3">
+                        <div class="first_left_side for-float-right">
+                            @Html.DropDownListFor(m => m.PVHeader.ENTITYID, ViewBag.EntityDropdown as SelectList, new {@id= "PVHeader_Entity", @class = "searchable", style = "width:250px" })
+                            @Html.DropDownListFor(m => m.PVHeader.CUSTAPPLICABLETYPEID, ViewBag.CustomerApplicableDropdown as SelectList, new {
+                           @id = "PVHeader_CustomerApplicable",
+                           @value = Model.PVHeader.CustomerApplicable, @class = "searchable", style = "width:250px", @onchange = "CustomerApplicablechange();" })
+                            @if(ViewBag.AccountSelection as SelectList == null)
+                            {
+                            @Html.DropDownListFor(m => m.PVHeader.AccountSelection, Enumerable.Empty<SelectListItem>(),
+                           new { @id = "PVHeader_AccountSelection", @value = Model.PVHeader.AccountSelection, @class = "searchable", style = "width:250px" })
+                            }
+                            else
+                            {
+                            @Html.DropDownListFor(m => m.PVHeader.ACCOUNTSELECTIONID, ViewBag.AccountSelection as SelectList, new { @id = "PVHeader_AccountSelection",
+                           @value = Model.PVHeader.AccountSelection, @class = "searchable", style = "width:250px" })
+                            }
+
+                        </div>
+                    </div>
+
+
+
+                    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-8 padding-zero mobileview-col-xs-4">
+                        <div class="first_right_side">
+                            <p>@Html.LabelFor(m => m.PVHeader.Branch)</p>
+                            <p>@Html.Label("Start Date")</p>
+                            <p>@Html.Label("End Date")</p>
+                        </div>
+                    </div>
+
+                    <div class="col-xs-3 col-md-3 col-sm-3 col-xs-3 mobileview-col-xs-3">
+                        <div class="first_right_side">
+                            @Html.DropDownListFor(m => m.PVHeader.BranchWithVat, ViewBag.BranchDropdown as SelectList,
+                           new { @id = "PVHeader_Branch", @class = "searchable", style = "width:250px", @onchange = "BranchChange();" })
+                            @if (Model.PVLine.Count > 0)
+                            {
+                                isdatecheck = true;
+                                @Html.TextBoxFor(m => Model.PVLine[0].StartDate, new { @class = "flatpickr flatpickr-input active", @id = "StartDate", style = "width:200px" })
+                                @Html.TextBoxFor(m => Model.PVLine[0].EndDate, new { @class = "flatpickr flatpickr-input active",  @id = "EndDate", style = "width:200px" })
+                            }
+                            else
+                            {
+                                @Html.TextBox("StartDate", new { @class = "flatpickr flatpickr-input active", @id = "StartDate", style = "width:200px" })
+                                @Html.TextBox("EndDate", new { @class = "flatpickr flatpickr-input active", @id = "EndDate", style = "width:200px" })
+                            }
+
+                        </div>
+                    </div>
+
+                    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-8 padding-zero mobileview-col-xs-4">
+                        <div class="first_right_side">
+                            <p>@Html.LabelFor(m => m.PVHeader.PriceTier)</p>
+                            <p>@Html.LabelFor(m => m.PVHeader.Description)</p>
+                        </div>
+                    </div>
+
+                    <div class="col-xs-3 col-md-3 col-sm-3 col-xs-3 mobileview-col-xs-3">
+                        <div class="first_right_side">
+                            @Html.DropDownListFor(m => m.PVHeader.TIERID, ViewBag.PriceTierDropdown as SelectList,
+                           new { @id="PVHeader_PriceTier", @class = "searchable", style = "width:200px" })
+                            @Html.TextAreaFor(m => m.PVHeader.Description, new
+                       {
+                           @placeholder = "Free Text (Max 30 Characters)",
+                           @rows = "2",
+                           @cols = "25",
+                           @maxlength = "30",
+                           style = "width:200px;height: 55px;"
+
+                       })
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <div class="left-side-bar for-order-margin">
+        <table id="PvcLinetbl" class="add-new-class table order_table order_table-right2 for-margin cell-border mobile_view_beforenone responsive-table">
+            <thead>
+                <tr>
+                    <th><input type="checkbox" id="chkBoxSelectAll"></th>
+                    <th>No</th>
+                    <th>Item Type</th>
+                    <th>Item Selection</th>
+                    <th>Item Name</th>
+                    <th>Current Price-VEP</th>
+                    <th>New Price(VEP)</th>
+                    <th>New Price(VIP)</th>
+                    <th>Discount</th>
+                    <th>%Discount</th>
+                    <th>Expected Volume(PC)</th>
+                    <th><div class="Actionbutton"><button type="button" style="width:70px" accesskey="A" onclick="AddPvcItemline(0);">+ Add</button></div></th>
+                    <th><div class="Actionbutton"><button type="button" accesskey="A" onclick="RemovePVLine(0);">Remove</button></div></th>
+
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null)
+                {
+                    PVFLine d = new PVFLine();
+                    <tr>
+                        <td><span class="mobile-before-label"></span></td>
+                        <td><span class="mobile-before-label"></span></td>
+                        <td><span class="mobile-before-label"></span>@Html.DropDownListFor(m => d.ItemType, ViewBag.ItemType as SelectList, new { @class = "searchable", @onchange = "ItemTypeChange();" })</td>
+
+                        <td><span class="mobile-before-label"></span>@Html.DropDownList("drpItemSelection", new SelectList(Enumerable.Empty<SelectListItem>()), new { @style = "width:200px", @class = "tabel_text_box searchable", @onchange = "ItemSelectionchnage();" })</td>
+                        <td><span class="mobile-before-label"></span>@Html.TextBoxFor(m => d.ItemName, new { @class = "", @readonly = "true", @style = "width:230px; font-size: 12px;" })</td>
+                        <td><span class="mobile-before-label"></span><span class="for_AmountSign">$ </span>@Html.TextBoxFor(m => d.CurrentPriceVEP, new { @class = "allow_numeric", @onchange = "CalculateDiscount();", @style = "width:50px; font-size: 12px;" })</td>
+                        <td><span class="mobile-before-label"></span><span class="for_AmountSign">$ </span>@Html.TextBoxFor(m => d.NewPriceVEP, new { @class = "allow_numeric", @onchange = "CalculateDiscount();", @style = "width:50px; font-size: 12px;" })</td>
+                        <td><span class="mobile-before-label"></span><span class="for_AmountSign">$ </span>@Html.TextBoxFor(m => d.NewPriceVIP, new { @style = "width:50px; font-size: 12px;", @readonly = "true" })</td>
+                        <td><span class="mobile-before-label"></span>@Html.TextBoxFor(m => d.Discount, new { @readonly = "true", @style = "width:50px; font-size: 12px;" })</td>
+                        <td><span class="mobile-before-label"></span>@Html.TextBoxFor(m => d.DiscountPer, new { @readonly = "true", @style = "width:50px; font-size: 12px;" })</td>
+                        <td><span class="mobile-before-label"></span>@Html.TextBoxFor(m => d.ExpectedVolumn, new { @class = "dontallow_decimal", @style = "width:80px; font-size: 12px;" })</td>
+
+                    </tr>
+
+                }
+
+            </tbody>
+            <tfoot>
+
+                @foreach (PVFLine line in Model.PVLine)
+                {
+                    if (Model.PVHeader.ISCHANGEREQUEST && (line.LineStatus==3|| line.LineStatus == 5 || line.LineStatus == 7))
+                    {
+                <tr>
+                    <td><input type="checkbox" class="singlechkbox" id="chkitemtfoot"></td>
+                    <td>@line.No</td>
+                    <td>@line.ItemTypeDesc</td>
+                    <td id="ItemSelection_@line.No">@line.ItemSelection</td>
+                    <td>@line.ItemName</td>
+                    <td><span class="mobile-before-label"></span><span class="for_AmountSign">$ </span>@Html.TextBoxFor(m => line.CurrentPriceVEP, new { @id = "CurrentPriceVEP_" + line.No, @class = "allow_numeric", @onchange = "CalculateDiscountChange('" + line.No + "');", @style = "width:50px; font-size: 12px;" })</td>
+                    <td><span class="mobile-before-label"></span><span class="for_AmountSign">$ </span>@Html.TextBoxFor(m => line.NewPriceVEP, new { @id = "NewPriceVEP_" + line.No, @class = "allow_numeric", @onchange = "CalculateDiscountChange('" + line.No + "');", @style = "width:50px; font-size: 12px;" })</td>
+                    <td id="NewPriceVIP_@line.No"><span class="for_AmountSign">$ </span>@line.NewPriceVIP</td>
+                    <td id="Discount_@line.No">@line.Discount</td>
+                    <td id="DiscountPer_@line.No">@line.DiscountPer</td>
+                    <td><span class="mobile-before-label"></span>@Html.TextBoxFor(m => line.ExpectedVolumn, new { @id = "ExpectedVolumn_" + @line.No, @class = "dontallow_decimal", @style = "width:80px; font-size: 12px;" })</td>
+                    <td><a href="#" onclick="SaveChangeData('@line.No')">Update</a></td>
+                    <td></td>
+                </tr>
+                    }
+                    else
+                    {
+            <tr>
+                <td><input type="checkbox" class="singlechkbox" id="chkitemtfoot"></td>
+                <td>@line.No</td>
+                <td>@line.ItemTypeDesc</td>
+                <td>@line.ItemSelection</td>
+                <td>@line.ItemName</td>
+                <td><span class="for_AmountSign">$ </span>@line.CurrentPriceVEP</td>
+                <td><span class="for_AmountSign">$ </span>@line.NewPriceVEP</td>
+                <td><span class="for_AmountSign">$ </span>@line.NewPriceVIP</td>
+                <td>@line.Discount</td>
+                <td>@line.DiscountPer</td>
+                <td>@line.ExpectedVolumn</td>
+                <td></td>
+                <td></td>
+            </tr>
+                    }
+                }
+            </tfoot>
+        </table>
+
+    </div>
+
+    if (Model != null)
+    {
+        if (!string.IsNullOrEmpty(Model.PVHeader.firstApproverComment) || !string.IsNullOrEmpty(Model.PVHeader.secondApproverComment) || !string.IsNullOrEmpty(Model.PVHeader.thirdApprovercomment))
+        {
+            <div class="for-top-border">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-1 col-md-1 col-sm-4 col-xs-4 padding-zero mobileview-col-xs-4" style="margin-left: -17px">
+                            <div class="first_left_side mobileview-col-xs-6">
+                                <p>Comments</p>
+                                <p>@Html.Label("1st Approver-")</p>
+                                <p>@Html.Label("2nd Approver-")</p>
+                                <p>@Html.Label("3rd Approver-")</p>
+                            </div>
+                        </div>
+
+                        <div class="col-xs-5 col-md-5 col-sm-3 col-xs-3 mobileview-col-xs-3">
+                            <div class="first_left_side for-float-right">
+                                <br>
+                                @Html.TextBoxFor(m => m.PVHeader.firstApproverComment, new { style = "width:250px", @readonly = "true" })
+                                @Html.TextBoxFor(m => m.PVHeader.secondApproverComment, new { style = "width:250px", @readonly = "true" })
+                                @Html.TextBoxFor(m => m.PVHeader.thirdApprovercomment, new { style = "width:250px", @readonly = "true" })
+                            </div>
+                        </div>
+                        <div class="col-xs-3 col-md-3 col-sm-3 col-xs-3 mobileview-col-xs-3">
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        }
+    }
+
+    <div class="for-bg-color">
+        <div class="container">
+            <div class="row">
+
+                <div class="col-lg-5 col-md-5 col-sm-5 col-xs-16">
+                    <div class="middel-center">
+                        <p>Upload Attachment :</p>
+                    </div>
+                    <div id="divImgUpload" class="right-middel">
+                        @{
+                            for (int i = 0; i < Model.PVHeader.PvImages.Count(); i++)
+                            {
+                                string ext = Path.GetExtension(Model.PVHeader.PvImages[i].ImageUrl);
+                                if (ext.ToUpper() == ".PDF")
+                                {
+                                    <a class="img-show" href="@Model.PVHeader.PvImages[i].ImageUrl" value="@Model.PVHeader.PvImages[i].ImageUrl" target="_blank">
+                                        <img class="upload-image" src="~/AcxiomDesign/images/pdf image.jpg" />
+                                    </a>
+
+                                }
+                                else if (ext.ToUpper() == ".DOCX")
+                                {
+                                    <a class="img-show" href="@Model.PVHeader.PvImages[i].ImageUrl" value="@Model.PVHeader.PvImages[i].ImageUrl" target="_blank">
+
+                                        <img class="upload-image" src="~/AcxiomDesign/images/word.jpg" />
+                                    </a>
+
+                                }
+                                else if (ext.ToUpper() == ".JPG" || ext.ToUpper() == ".JPEG" || ext.ToUpper() == ".PNG")
+                                {
+                                    <a class="img-show" href="@Model.PVHeader.PvImages[i].ImageUrl" value="@Model.PVHeader.PvImages[i].ImageUrl" target="_blank">
+                                        <img class="upload-image" src="~/AcxiomDesign/images/jpg-image.jpg" />
+                                    </a>
+
+                                }
+                                else if (ext.ToUpper() == ".XLSX")
+                                {
+                                    <a class="img-show" href="@Model.PVHeader.PvImages[i].ImageUrl" value="@Model.PVHeader.PvImages[i].ImageUrl" target="_blank">
+
+                                        <img class="upload-image" src="~/AcxiomDesign/images/Excel image.jpg" />
+                                    </a>
+
+                                }
+
+                            }
+                        }
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <br>
+   
+    <div class="for-bg-color">
+        <div class="container">
+            <div class="row">
+
+                <div class="col-lg-6 col-md-4 col-sm-4 col-xs-16">
+                    <div class="middel-center">
+                        <p>Attachment :</p>
+                    </div>
+                    <div class="right-middel">
+
+                        <div class="view-catalog-PVC mobileviewcatelog">
+                            <div class="browse_btn">
+                                <input type="file" id="FileUpload" name="FileUpload" class="" />
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="right-middel">
+                        <button style="margin-left:20px;" type="button" accesskey="A" onclick="validatefile();">Upload Files</button>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 mobileview-col-xs-6 form-group-mobile">
+                    <div class="right-middel">
+                        @if (Model != null)
+                        {
+                            if (Model.PVHeader.ISCHANGEREQUEST)
+                            {
+                                <button style="margin-left: 20px; margin-bottom: 5px;" type="button" accesskey="A" onclick="PVCUserAction('2');">Cancel</button>
+                            }
+
+                        }
+                    </div>
+                    <div class="right-middel">
+                        <button style="margin-left: 20px; display: none; margin-bottom: 5px;" id="btnsubmit" type="button" accesskey="A" onclick="PVCUserAction('0')">Submit</button>
+                    </div>
+                    <div class="right-middel">
+                        <button type="button" style="margin-left: 20px; display: none; margin-bottom: 5px;" id="btnSkip1stApproval" accesskey="A" onclick="PVCUserAction('1')">Skip 1st Approval</button>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else if (Model.PVHeader.HeaderStatus == 1)
+{
+<div class="wrapperbox">
+    <div class="top-title">
+        <h2>Price Variance Form</h2>
+
+
+        <div style="margin-bottom:29px">
+            @if (Model.PVHeader.PVCNO == "")
+            {
+                <button class="btnSave_pvc" type="submit" onclick="SavePVCData()" id="btnsavePVC">Save</button>
+            }
+            else
+            { <button class="btnSave_pvc" type="submit" onclick="UpdatePVCDataApproval()" id="btnUpdatePVC">Update</button>}
+            <span id="Pvnumber" class="for_PVCNumSeq">@ViewBag.PVCNUMSEQ</span><span class="for_PVCNumSeq"> PV No :-</span>
+
+        </div>
+
+
+    </div>
+
+    <div class="for-top-border">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-1 col-md-1 col-sm-4 col-xs-4 padding-zero mobileview-col-xs-4" style="margin-left: -17px">
+                    <div class="first_left_side mobileview-col-xs-6">
+                        <p>@Html.LabelFor(m => m.PVHeader.Entity)</p>
+                        <p>@Html.LabelFor(m => m.PVHeader.CustomerApplicable)</p>
+                        <p>@Html.LabelFor(m => m.PVHeader.AccountSelection)</p>
+                    </div>
+                </div>
+
+                <div class="col-xs-3 col-md-3 col-sm-3 col-xs-3 mobileview-col-xs-3">
+                    <div class="first_left_side for-float-right">
+                        @Html.DropDownListFor(m => m.PVHeader.ENTITYID, ViewBag.EntityDropdown as SelectList, new { @id = "PVHeader_Entity", @class = "searchable", style = "width:250px" })
+                        @Html.DropDownListFor(m => m.PVHeader.CUSTAPPLICABLETYPEID, ViewBag.CustomerApplicableDropdown as SelectList, new
+                        {
+                       @id = "PVHeader_CustomerApplicable",
+                       @value = Model.PVHeader.CustomerApplicable,
+                            @class = "searchable",
+                            style = "width:250px",
+                            @onchange = "CustomerApplicablechange();"
+                        })
+                        @if (ViewBag.AccountSelection as SelectList == null)
+                        {
+                            @Html.DropDownListFor(m => m.PVHeader.AccountSelection, Enumerable.Empty<SelectListItem>(),
+                           new { @id = "PVHeader_AccountSelection", @value = Model.PVHeader.AccountSelection, @class = "searchable", style = "width:250px" })
+                        }
+                        else
+                        {
+                            @Html.DropDownListFor(m => m.PVHeader.ACCOUNTSELECTIONID, ViewBag.AccountSelection as SelectList, new
+                            {
+                                @id = "PVHeader_AccountSelection",
+                           @value = Model.PVHeader.AccountSelection,
+                                @class = "searchable",
+                                style = "width:250px"
+                            })
+                        }
+
+                    </div>
+                </div>
+
+
+
+                <div class="col-lg-1 col-md-1 col-sm-1 col-xs-8 padding-zero mobileview-col-xs-4">
+                    <div class="first_right_side">
+                        <p>@Html.LabelFor(m => m.PVHeader.Branch)</p>
+                        <p>@Html.Label("Start Date")</p>
+                        <p>@Html.Label("End Date")</p>
+                    </div>
+                </div>
+
+                <div class="col-xs-3 col-md-3 col-sm-3 col-xs-3 mobileview-col-xs-3">
+                    <div class="first_right_side">
+                        @Html.DropDownListFor(m => m.PVHeader.BranchWithVat, ViewBag.BranchDropdown as SelectList,
+                       new { @id = "PVHeader_Branch", @class = "searchable", style = "width:250px", @onchange = "BranchChange();" })
+                        @if (Model.PVLine.Count > 0)
+                        {
+                            isdatecheck = true;
+                            @Html.TextBoxFor(m => Model.PVLine[0].StartDate, new { @class = "flatpickr flatpickr-input active", @id = "StartDate", style = "width:200px" })
+                            @Html.TextBoxFor(m => Model.PVLine[0].EndDate, new { @class = "flatpickr flatpickr-input active", @id = "EndDate", style = "width:200px" })
+                        }
+                        else
+                        {
+                            @Html.TextBox("StartDate", new { @class = "flatpickr flatpickr-input active", @id = "StartDate", style = "width:200px" })
+                            @Html.TextBox("EndDate", new { @class = "flatpickr flatpickr-input active", @id = "EndDate", style = "width:200px" })
+                        }
+
+                    </div>
+                </div>
+
+                <div class="col-lg-1 col-md-1 col-sm-1 col-xs-8 padding-zero mobileview-col-xs-4">
+                    <div class="first_right_side">
+                        <p>@Html.LabelFor(m => m.PVHeader.PriceTier)</p>
+                        <p>@Html.LabelFor(m => m.PVHeader.Description)</p>
+                    </div>
+                </div>
+
+                <div class="col-xs-3 col-md-3 col-sm-3 col-xs-3 mobileview-col-xs-3">
+                    <div class="first_right_side">
+                        @Html.DropDownListFor(m => m.PVHeader.TIERID, ViewBag.PriceTierDropdown as SelectList,
+                       new { @id = "PVHeader_PriceTier", @class = "searchable", style = "width:200px" })
+                        @Html.TextAreaFor(m => m.PVHeader.Description, new
+                   {
+                       @placeholder = "Free Text (Max 30 Characters)",
+                       @rows = "2",
+                       @cols = "25",
+                       @maxlength = "30",
+                       style = "width:200px;height: 55px;"
+                   })
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+    <div class="left-side-bar for-order-margin">
+        <table id="PvcLinetbl" class="add-new-class table order_table order_table-right2 for-margin cell-border mobile_view_beforenone responsive-table">
+            <thead>
+                <tr>
+                    <th><input type="checkbox" id="chkBoxSelectAll"></th>
+                    <th>No</th>
+                    <th>Item Type</th>
+                    <th>Item Selection</th>
+                    <th>Item Name</th>
+                    <th>Current Price-VEP</th>
+                    <th>New Price(VEP)</th>
+                    <th>New Price(VIP)</th>
+                    <th>Discount</th>
+                    <th>%Discount</th>
+                    <th>Expected Volume(PC)</th>
+                    <th><img src="/AcxiomDesign/images/right_icon.png" onclick="UpdateAllLineStatus('2')"></th>
+                    <th><img src="/AcxiomDesign/images/close_red.png" onclick="UpdateAllLineStatus('3')"></th>
+                    <th><div class="Actionbutton"><button type="button" style="width:70px" accesskey="A" onclick="AddPvcItemline(1);">+ Add</button></div></th>
+                    <th><div class="Actionbutton"><button type="button" accesskey="A" onclick="RemovePVLine(1);">Remove</button></div></th>
+
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null)
+                {
+                    PVFLine d = new PVFLine();
+                <tr>
+                    <td><span class="mobile-before-label"></span></td>
+                    <td><span class="mobile-before-label"></span></td>
+                    <td><span class="mobile-before-label"></span>@Html.DropDownListFor(m => d.ItemType, ViewBag.ItemType as SelectList, new { @class = "searchable", @onchange = "ItemTypeChange();" })</td>
+
+                    <td><span class="mobile-before-label"></span>@Html.DropDownList("drpItemSelection", new SelectList(Enumerable.Empty<SelectListItem>()), new { @style = "width:100px", @class = "tabel_text_box searchable", @onchange = "ItemSelectionchnage();" })</td>
+                    <td><span class="mobile-before-label"></span>@Html.TextBoxFor(m => d.ItemName, new { @class = "", @readonly = "true", @style = "width:250px; font-size: 12px;" })</td>
+                    <td><span class="mobile-before-label"></span><span class="for_AmountSign">$ </span>@Html.TextBoxFor(m => d.CurrentPriceVEP, new { @class = "allow_numeric", @onchange = "CalculateDiscount();", @style = "width:50px; font-size: 12px;" })</td>
+                    <td><span class="mobile-before-label"></span><span class="for_AmountSign">$ </span>@Html.TextBoxFor(m => d.NewPriceVEP, new { @class = "allow_numeric", @onchange = "CalculateDiscount();", @style = "width:50px; font-size: 12px;" })</td>
+                    <td><span class="mobile-before-label"></span><span class="for_AmountSign">$ </span>@Html.TextBoxFor(m => d.NewPriceVIP, new { @style = "width:50px; font-size: 12px;", @readonly = "true" })</td>
+                    <td><span class="mobile-before-label"></span>@Html.TextBoxFor(m => d.Discount, new { @readonly = "true", @style = "width:80px; font-size: 12px;" })</td>
+                    <td><span class="mobile-before-label"></span>@Html.TextBoxFor(m => d.DiscountPer, new { @readonly = "true", @style = "width:80px; font-size: 12px;" })</td>
+                    <td><span class="mobile-before-label"></span>@Html.TextBoxFor(m => d.ExpectedVolumn, new { @class = "dontallow_decimal", @style = "width:80px; font-size: 12px;" })</td>
+
+                </tr>
+
+
+                }
+
+            </tbody>
+            <tfoot>
+                @{
+                    foreach (PVFLine line in Model.PVLine)
+                    {
+                                <tr>
+                                    @if (@line.ISAPPROVE == 0 || @line.ISAPPROVE == 1)
+                                    {
+                                        <td></td>
+                                    }
+                                    else
+                                    {
+                                        <td><input type="checkbox" class="singlechkbox" id="chkitemtfoot"></td>
+                                    }
+
+                                    <td>@line.No</td>
+                                    <td>@line.ItemTypeDesc</td>
+                                    <td>@line.ItemSelection</td>
+                                    <td>@line.ItemName</td>
+                                    <td><span class="for_AmountSign">$ </span>@line.CurrentPriceVEP</td>
+                                    <td><span class="for_AmountSign">$ </span>@line.NewPriceVEP</td>
+                                    <td><span class="for_AmountSign">$ </span>@line.NewPriceVIP</td>
+                                    <td>@line.Discount</td>
+                                    <td>@line.DiscountPer</td>
+                                    <td>@line.ExpectedVolumn</td>
+                                    @if (@line.ISAPPROVE == 0)
+                                    {
+                                        isapprove = true;
+                                        <td><img src="/AcxiomDesign/images/right_icon.png"></td>
+
+                                        <td></td>
+                                    }
+                                    else if (@line.ISAPPROVE == 1)
+                                    {
+                                        isreject = true;
+                                        <td></td>
+                                        <td><img src="/AcxiomDesign/images/close_red.png"></td>
+                                    }
+                                    else
+                                    {
+                                        isapprove = false;
+                                        isreject = false;
+                                        <td><img src="/AcxiomDesign/images/right_icon.png" onclick="UpdateLineStatus('2','@line.ItemSelection')"></td>
+                                        <td><img src="/AcxiomDesign/images/close_red.png" onclick="UpdateLineStatus('3','@line.ItemSelection')"></td>
+                                    }
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+
+                    }
+                }
+
+            </tfoot>
+        </table>
+
+    </div>
+
+    <div class="for-top-border">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-1 col-md-1 col-sm-4 col-xs-4 padding-zero mobileview-col-xs-4" style="margin-left: -17px">
+                    <div class="first_left_side mobileview-col-xs-6">
+                        <p>Comments</p>
+                        <p>@Html.Label("1st Approver-")</p>
+                        <p>@Html.Label("2nd Approver-")</p>
+                        <p>@Html.Label("3rd Approver-")</p>
+                    </div>
+                </div>
+
+                <div class="col-xs-5 col-md-5 col-sm-3 col-xs-3 mobileview-col-xs-3">
+                    <div class="first_left_side for-float-right">
+                        <br>
+                        @Html.TextBoxFor(m => m.PVHeader.firstApproverComment, new { style = "width:250px" })
+                        @Html.TextBoxFor(m => m.PVHeader.secondApproverComment, new { style = "width:250px", @readonly = "true" })
+                        @Html.TextBoxFor(m => m.PVHeader.thirdApprovercomment, new { style = "width:250px", @readonly = "true" })
+                    </div>
+                </div>
+                <div class="col-xs-3 col-md-3 col-sm-3 col-xs-3 mobileview-col-xs-3">
+                </div>
+                <div class="col-xs-3 col-md-3 col-sm-3 col-xs-3 mobileview-col-xs-3">
+                    <button class="btnSave_RequestChange" type="submit" onclick="UpdateHeaderStatus('0','1')" id="btnsavePVC">Request for Change</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="for-bg-color">
+        <div class="container">
+            <div class="row">
+
+                <div class="col-lg-5 col-md-5 col-sm-5 col-xs-16">
+                    <div class="middel-center">
+                        <p>Upload Attachment :</p>
+                    </div>
+                    <div id="divImgUpload" class="right-middel">
+                        @{
+                            for (int i = 0; i < Model.PVHeader.PvImages.Count(); i++)
+                            {
+                                string ext = Path.GetExtension(Model.PVHeader.PvImages[i].ImageUrl);
+                                if (ext.ToUpper() == ".PDF")
+                                {
+                                    <a class="img-show" href="@Model.PVHeader.PvImages[i].ImageUrl" value="@Model.PVHeader.PvImages[i].ImageUrl" target="_blank">
+                                        <img class="upload-image" src="~/AcxiomDesign/images/pdf image.jpg" />
+                                    </a>
+
+                                }
+                                else if (ext.ToUpper() == ".DOCX")
+                                {
+                                    <a class="img-show" href="@Model.PVHeader.PvImages[i].ImageUrl" value="@Model.PVHeader.PvImages[i].ImageUrl" target="_blank">
+
+                                        <img class="upload-image" src="~/AcxiomDesign/images/word.jpg" />
+                                    </a>
+
+                                }
+                                else if (ext.ToUpper() == ".JPG" || ext.ToUpper() == ".JPEG" || ext.ToUpper() == ".PNG")
+                                {
+                                    <a class="img-show" href="@Model.PVHeader.PvImages[i].ImageUrl" value="@Model.PVHeader.PvImages[i].ImageUrl" target="_blank">
+                                        <img class="upload-image" src="~/AcxiomDesign/images/jpg-image.jpg" />
+                                    </a>
+
+                                }
+                                else if (ext.ToUpper() == ".XLSX")
+                                {
+                                    <a class="img-show" href="@Model.PVHeader.PvImages[i].ImageUrl" value="@Model.PVHeader.PvImages[i].ImageUrl" target="_blank">
+
+                                        <img class="upload-image" src="~/AcxiomDesign/images/Excel image.jpg" />
+                                    </a>
+
+                                }
+
+                            }
+                        }
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <br>
+
+    <div class="for-bg-color">
+        <div class="container">
+            <div class="row">
+
+                <div class="col-lg-6 col-md-4 col-sm-4 col-xs-16">
+                    <div class="middel-center">
+                        <p>Attachment :</p>
+                    </div>
+                    <div class="right-middel">
+
+                        <div class="view-catalog-PVC mobileviewcatelog">
+                            <div class="browse_btn">
+                                <input type="file" id="FileUpload" name="FileUpload" class="" />
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="right-middel">
+                        <button style="margin-left:20px;" type="button" accesskey="A" onclick="validatefile();">Upload Files</button>
+                    </div>
+
+                </div>
+
+                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 mobileview-col-xs-6 form-group-mobile">
+                    <div class="right-middel">
+                        @if (isreject && isapprove == false)
+                        {
+                            <button style="margin-left: 20px; margin-bottom: 5px;" type="button" id="btnReject" accesskey="A" onclick="UpdateHeaderStatus('2','3');">Reject</button>
+                        }
+                        else
+                        {<button style="margin-left: 20px; display: none; margin-bottom: 5px;" type="button" id="btnReject" accesskey="A" onclick="UpdateHeaderStatus('2','3');">Reject</button>}
+                    </div>
+                    <div class="right-middel">
+                        @if (isapprove && isreject == false)
+                        {
+                            <button style="margin-left: 20px;  margin-bottom: 5px;" type="button" accesskey="A" id="btnApprove" onclick="UpdateHeaderStatus('1','2');">Approve</button>
+                        }
+                        else
+                        {
+                            <button style="margin-left: 20px; display: none; margin-bottom: 5px;" type="button" accesskey="A" id="btnApprove" onclick="UpdateHeaderStatus('1','2');">Approve</button>
+                        }
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+}
+<script type="text/javascript">
+    $(document).delegate(".allow_numeric", "paste", function (event) {
+        if (event.type == "paste") {
+            var clipboardData = event.originalEvent.clipboardData || window.clipboardData;
+            var pastedData = clipboardData.getData('Text');
+            if (isNaN(pastedData)) {
+                event.preventDefault();
+
+            } else {
+                return;
+            }
+        }
+    });
+
+    $(document).delegate(".allow_numeric", "keypress", function (e) {
+        if (e.which == 46) {
+            if ($(this).val().indexOf('.') != -1) {
+                return false;
+            }
+        }
+        if (e.which != 8 && e.which != 0 && e.which != 46 && (e.which < 48 || e.which > 57)) {
+            return false;
+        }
+    });
+
+    $(document).delegate(".dontallow_decimal", "keypress", function (e) {
+        if (e.which == 46) {
+            return false;
+        }
+        if (e.which != 8 && e.which != 0 && (e.which < 48 || e.which > 57)) {
+            return false;
+        }
+    });
+
+    $(document).ready(function () {
+
+        // checked checboxes
+        var $selectAll = $('#chkBoxSelectAll'); // main checkbox inside table thead
+
+        $selectAll.on('click', function () {
+
+            $('.singlechkbox').prop('checked', this.checked);
+        });
+
+
+    });
+
+    $(document).ready(function ()
+    {
+        
+        var datacheck ='@isdatecheck'
+        if (datacheck == "False") {
+            var check_in = flatpickr("#StartDate", { dateFormat: "d-M-Y", minDate: new Date(), defaultDate: new Date() });
+            var check_out = flatpickr("#EndDate", { dateFormat: "d-M-Y", minDate: new Date(), defaultDate: new Date() });
+        }
+        else
+        {
+
+         var check_in = flatpickr("#StartDate", { dateFormat: "d-M-Y", minDate: new Date()  });
+         var check_out = flatpickr("#EndDate", { dateFormat: "d-M-Y", minDate: new Date() });
+
+        }
+    });
+
+    $(function () {
+
+    });
+
+    function Validate() {
+        var startDate = document.getElementById("StartDate").value;
+        var endDate = document.getElementById("EndDate").value;
+        if (startDate == '') {
+            ShowMessage('Please Pick a "From Date"!');
+            return false;
+        }
+        else if (endDate == '') {
+            ShowMessage('Please Pick a "To Date"!');
+            return false;
+        }
+
+        else if ((Date.parse(startDate) > Date.parse(endDate))) {
+            ShowMessage('"To Date" should be greater than "From Date"!');
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+
+    function ItemTypeChange() {
+
+        var itemtype = $('#d_ItemType').val();
+        var entityid = $('#PVHeader_Entity').val();
+        if (itemtype != '') {
+            $.ajax({
+                type: "GET",
+                crossDomain: true,
+                dataType: 'json',
+                url: '/PriceVariance/GetItemSelection?itemtype=' + itemtype + '&Entityid=' + entityid + '',
+                success: function (responsedata) {
+                    $("#drpItemSelection").empty();
+                    $('#drpItemSelection').attr('enabled', 'true').chosen("destroy");
+                    var data = JSON.parse(responsedata);
+                    $('#drpItemSelection').append($("<option></option>").val('').html('Select an Option'));
+                    $.each(data, function (index, obj) {
+
+                        $('#drpItemSelection').append($("<option></option>").val(obj.ITEMID).html(obj.ITEMNAME));
+
+                    });
+                    $('#drpItemSelection').chosen();
+
+                }
+            });
+        }
+    }
+
+    function ItemSelectionchnage() {
+        var itemselectionName = $('#drpItemSelection option:selected').text()
+        $('#d_ItemName').val(itemselectionName);
+    }
+
+    function CalculateDiscount() {
+    
+        var currentVepvalue = $('#d_CurrentPriceVEP').val();
+        var newpriceVep = $('#d_NewPriceVEP').val();
+        var BranchId = $('#PVHeader_Branch').val();
+        BranchId = BranchId.split('-')[1];
+        if (newpriceVep > 0) {
+            //if (Number(currentVepvalue) > Number(newpriceVep))
+            //{
+            //    $('#d_CurrentPriceVEP').val('');
+            //    $('#d_NewPriceVEP').val('');
+            //    $('#d_NewPriceVIP').val('')
+            //    ShowMessage('Current VEP Price should be less New Price VEP');
+            //    return false;
+            //}
+            //else
+            if (BranchId == "") {
+                $('#d_NewPriceVEP').val('');
+
+                ShowMessage('Please Select the Branch');
+                return false;
+            }
+            else {
+                $('#d_Discount').val(currentVepvalue - newpriceVep)
+                var newprice = Number((newpriceVep * BranchId / 100) + Number(newpriceVep));
+                $('#d_NewPriceVIP').val(newprice.toFixed(2))
+            }
+        }
+
+
+
+        var discountcase = $('#d_Discount').val();
+        if (discountcase != 0 && currentVepvalue != 0) {
+            var discountper = (discountcase / currentVepvalue) * 100;
+            $('#d_DiscountPer').val(discountper.toFixed(1))
+        }
+
+    }
+
+    function CalculateDiscountChange(LineNO)
+    {
+        debugger;
+        var currentVepvalue = $('#CurrentPriceVEP_' + LineNO).val();
+        var newpriceVep = $('#NewPriceVEP_' + LineNO).val();
+        var newpriceVip = $('#NewPriceVIP_' + LineNO).text();
+        var BranchId = $('#PVHeader_Branch').val();
+        BranchId = BranchId.split('-')[1];
+        if (newpriceVep > 0) {
+            if (BranchId == "") {
+                $('#NewPriceVEP_' + LineNO).val('');
+
+                ShowMessage('Please Select the Branch');
+                return false;
+            }
+            else {
+               
+                $('#Discount_' + LineNO).text(Number(currentVepvalue - newpriceVep));
+                var newprice = Number((newpriceVep * BranchId / 100) + Number(newpriceVep));
+                $('#NewPriceVIP_' + LineNO).text(newprice.toFixed(2))
+            }
+        }
+
+
+
+        var discountcase = $('#Discount_' + LineNO).text();
+        if (discountcase != 0 && currentVepvalue != 0) {
+            var discountper = (discountcase / currentVepvalue) * 100;
+            $('#DiscountPer_'+LineNO).text(discountper.toFixed(1))
+        }
+    }
+
+    function BranchChange()
+    {
+
+        var newpriceVep = $('#d_NewPriceVEP').val();
+        var BranchId = $('#PVHeader_Branch').val();
+
+        if (BranchId == "") {
+            ShowMessage('Please Select the Branch');
+            return false;
+        }
+        else
+        {
+           
+            BranchId = BranchId.split('-')[1];
+            var newprice = Number((newpriceVep * BranchId / 100) + Number(newpriceVep));
+            $('#d_NewPriceVIP').val(newprice.toFixed(2))
+        }
+
+    }
+
+    function CustomerApplicablechange() {
+        var custType = $('#PVHeader_CustomerApplicable').val();
+        var entityid = $('#PVHeader_Entity').val();
+        if (custType != '') {
+            $("#PVHeader_AccountSelection").empty();
+            $('#PVHeader_AccountSelection').attr('enabled', 'true').chosen("destroy");
+            $.ajax({
+                type: "GET",
+                crossDomain: true,
+                dataType: 'json',
+                url: '/PriceVariance/GetAccountSelection?CustType=' + custType + '&Entityid=' + entityid + '',
+                success: function (responsedata) {
+
+                    $("#PVHeader_AccountSelection").empty();
+                    $('#PVHeader_AccountSelection').attr('enabled', 'true').chosen("destroy");
+                    var data = JSON.parse(responsedata);
+
+                    $('#PVHeader_AccountSelection').append($("<option></option>").val('').html('Select an Option'));
+                    if (custType == "1") {
+                        $.each(data, function (index, obj) {
+
+                            $('#PVHeader_AccountSelection').append($("<option></option>").val(obj.SUBCHANNELID).html(obj.SUBCHANNELDESC));
+
+                        });
+                    }
+                    else if (custType == "2") {
+                        $.each(data, function (index, obj) {
+
+                            $('#PVHeader_AccountSelection').append($("<option></option>").val(obj.CHAINID).html(obj.CHAINDESC));
+
+                        });
+                    }
+                    else if (custType == "3") {
+                        $.each(data, function (index, obj) {
+
+                            $('#PVHeader_AccountSelection').append($("<option></option>").val(obj.CUSTPRICEGROUPID).html(obj.CUSTPRICEGROUPDESC));
+
+                        });
+                    }
+                    else if (custType == "4") {
+                        $.each(data, function (index, obj) {
+
+                            $('#PVHeader_AccountSelection').append($("<option></option>").val(obj.AccountNum).html(obj.CUSTOMERNAME));
+
+                        });
+                    }
+                    $('#PVHeader_AccountSelection').chosen();
+
+                }
+            });
+        }
+    }
+
+    function AddPvcItemline(actionby) {
+        var startDate = document.getElementById("StartDate").value;
+        var endDate = document.getElementById("EndDate").value;
+        if (startDate == '') {
+            ShowMessage('Please Pick a "From Date"!');
+            return false;
+        }
+        else if (endDate == '') {
+            ShowMessage('Please Pick a "To Date"!');
+            return false;
+        }
+
+        else if ((Date.parse(startDate) > Date.parse(endDate))) {
+            ShowMessage('"To Date" should be greater than "From Date"!');
+            return false;
+        }
+        var itemtype = $('#d_ItemType option:selected').text()
+        var itemtypeid = $('#d_ItemType').val();
+        var ItemName = $('#drpItemSelection option:selected').text()
+        var itemselection = $('#drpItemSelection').val();
+        var currentVEPprice = $('#d_CurrentPriceVEP').val()
+        var newVEPprice = $('#d_NewPriceVEP').val()
+        var newvipprice = $('#d_NewPriceVIP').val()
+        var discount = $('#d_Discount').val();
+        var discountPer = $('#d_DiscountPer').val();
+        var ExpectedVol = $('#d_ExpectedVolumn').val();
+        var pvcnumber = $('#Pvnumber').text();
+        var startDate = $('#StartDate').val();
+        var enddate = $('#EndDate').val();
+        var entityId = $('#PVHeader_Entity').val();
+        var BranchId = $('#PVHeader_Branch').val();
+        BranchId = BranchId.split('-')[1];
+        if (entityId == "") {
+            ShowMessage('Please Select the Entity');
+            return false;
+        }
+        else if (BranchId == "") {
+            ShowMessage('Please Select the Branch');
+            return false;
+        }
+        else if (startDate == "") {
+            ShowMessage('Please Select the Start Date');
+            return false;
+        }
+        else if (enddate == "") {
+            ShowMessage('Please Select the End Date');
+            return false;
+        }
+        //else if (pvcnumber == "") {
+        //    ShowMessage('PV No is blank!Please refresh the window');
+        //    return false;
+        //}
+        else if (itemtypeid == "") {
+            ShowMessage('Please Select the Item Type');
+            return false;
+        }
+        else if (itemselection == "") {
+            ShowMessage('Please Select the Item');
+            return false;
+        }
+        else if (currentVEPprice == "" || currentVEPprice <= 0) {
+            ShowMessage('Please fill item details');
+            return false;
+        }
+        else if (newVEPprice == "" || newVEPprice <= 0) {
+            ShowMessage('Please Enter  the New VEP Price');
+            return false;
+        }
+        else if (ExpectedVol == "") {
+            ShowMessage('Please Enter  the Expected Vol');
+            return false;
+        }
+        else {
+            $.ajax({
+                type: "POST",
+                crossDomain: true,
+                dataType: 'json',
+                url: '/PriceVariance/AddPVCLineItem?VatPerBranch=' + BranchId + '&Itemtype=' + itemtypeid + '&Itemselection=' + itemselection + '&CurrentVEPprice=' + currentVEPprice + '&NewVEPprice=' + newVEPprice + '&ExpectedVol=' + ExpectedVol + '&PVCNUM=' + pvcnumber + '&Entityid=' + entityId + '&Startdate=' + startDate + '&Enddate=' + enddate + '&ItemName=' + ItemName + '&ItemTypeName=' + itemtype + '',
+                success: function (responsedata) {
+
+                    if (responsedata.success) {
+                        $('#EndDate').prop('disabled', true);
+                        $('#StartDate').prop('disabled', true);
+                        $('#PvcLinetbl tfoot').empty();
+                        var jsondata = JSON.parse(responsedata.data);
+                        if (actionby == 0)  // BY user
+                        {
+                            $.each(jsondata, function (index, obj)
+                            {
+                                debugger;
+                                if (obj.NO == undefined)
+                                {
+                                    obj.NO = Number(index + 1);
+                                }
+                                var newRow = '<tr><td><input type="checkbox" class="singlechkbox" id="chkitemtfoot"></input></td><td>' + obj.NO + '</td><td>' + obj.ITEMTYPEDESC + '</td><td>' + obj.ITEMTYPECODE + '</td><td>' + obj.ITEMNAME + '</td><td><span class="for_AmountSign">$ </span>' + obj.CURRENTVEP + '</td><td><span class="for_AmountSign">$ </span>' + obj.PROPOSEDVEP + '</td>';
+                                newRow = newRow + '<td><span class="for_AmountSign">$ </span>' + obj.PROPOSEDVIP + '</td><td>' + obj.DISCPERCASE + '</td><td>' + obj.DISCPERCENTAGE + '</td><td>' + obj.EXPECTEDVOL + '</td>';
+                                newRow = newRow + '<td><td></td></tr>';
+
+                                $('#PvcLinetbl tfoot').append(newRow);
+
+                            });
+                        }
+                        else if (actionby == 1)// BY Approver
+                        {
+
+                            $.each(jsondata, function (index, obj) {
+                                var ImgApprove = '<img src="/AcxiomDesign/images/right_icon.png" onclick="UpdateLineStatus(2,\'' + obj.ITEMTYPECODE + '\')">';
+                                var ImgReject = '<img src="/AcxiomDesign/images/close_red.png" onclick="UpdateLineStatus(3,\'' + obj.ITEMTYPECODE + '\')">';
+                                var newRow = '<tr><td><input type="checkbox" class="singlechkbox" id="chkitemtfoot"></input></td><td>' + obj.NO + '</td><td>' + obj.ITEMTYPEDESC + '</td><td>' + obj.ITEMTYPECODE + '</td><td>' + obj.ITEMNAME + '</td><td><span class="for_AmountSign">$ </span>' + obj.CURRENTVEP + '</td><td><span class="for_AmountSign">$ </span>' + obj.PROPOSEDVEP + '</td>';
+                                newRow = newRow + '<td><span class="for_AmountSign">$ </span>' + obj.PROPOSEDVIP + '</td><td>' + obj.DISCPERCASE + '</td><td>' + obj.DISCPERCENTAGE + '</td><td>' + obj.EXPECTEDVOL + '</td>';
+                                newRow = newRow + '<td>' + ImgApprove + '</td><td>' + ImgReject + '</td><td></td><td></td></tr>';
+
+                                $('#PvcLinetbl tfoot').append(newRow);
+
+                            });
+                        }
+
+                        ResetAddLine();
+                    }
+                    else {
+                        ShowMessage(responsedata.data);
+                    }
+
+                }
+            });
+        }
+
+
+
+
+    }
+
+    function ResetAddLine() {
+        $('#d_ItemType').get(0).selectedIndex = -1;
+        $('#drpItemSelection').get(0).selectedIndex = -1;
+        $("#drpItemSelection").chosen("destroy").chosen();
+        $("#d_ItemType").chosen("destroy").chosen();
+        $('#d_ItemName').val('');
+        $('#d_CurrentPriceVEP').val('')
+        $('#d_NewPriceVEP').val('')
+        $('#d_NewPriceVIP').val('')
+        $('#d_Discount').val('');
+        $('#d_DiscountPer').val('');
+        $('#d_ExpectedVolumn').val('');
+    }
+
+    function RemovePVLine(actionby) {
+
+        var itemCode = $("#PvcLinetbl tfoot tr:has(input:checked)").map(function () {
+            var $tr = $(this);
+            var ItemCode = $tr.find("td:nth-child(4)").text();
+            return ItemCode;
+        }).toArray();
+        var pvcnumber = $('#Pvnumber').text();
+        var entityId = $('#PVHeader_Entity').val();
+        if (itemCode.length <= 0) {
+            ShowMessage("Please select the line to Remove");
+            return false;
+        }
+
+
+        if (entityId == "") {
+            ShowMessage('Please Select the Entity');
+            return false;
+        }
+        //else if (pvcnumber == "") {
+        //    ShowMessage('PV No is blank!Please refresh the window');
+        //    return false;
+        //}
+        else {
+            $.ajax({
+                type: "POST",
+                crossDomain: true,
+                dataType: 'json',
+                url: '/PriceVariance/DeletePVLineItem?PVCNUM=' + pvcnumber + '&Entityid=' + entityId + '&SelectedItem=' + itemCode + '',
+                success: function (responsedata) {
+                    debugger;
+                    if (responsedata.success) {
+                        $('#PvcLinetbl tfoot').empty();
+                        var jsondata = JSON.parse(responsedata.data);
+                        var RowCount = $("#PvcLinetbl > tfoot").find("tr").length;
+                        if (RowCount == 0) {
+                            $('#EndDate').prop('disabled', false);
+                            $('#StartDate').prop('disabled', false);
+                        }
+
+                        if (actionby == 0)  // BY user
+                        {
+                            $.each(jsondata, function (index, obj) {
+
+                                var newRow = '<tr><td><input type="checkbox" class="singlechkbox" id="chkitemtfoot"></input></td><td>' + Number(index + 1) + '</td><td>' + obj.ITEMTYPEDESC + '</td><td>' + obj.ITEMTYPECODE + '</td><td>' + obj.ITEMNAME + '</td><td><span class="for_AmountSign">$ </span>' + obj.CURRENTVEP + '</td><td><span class="for_AmountSign">$ </span>' + obj.PROPOSEDVEP + '</td>';
+                                newRow = newRow + '<td><span class="for_AmountSign">$ </span>' + obj.PROPOSEDVIP + '</td><td>' + obj.DISCPERCASE + '</td><td>' + obj.DISCPERCENTAGE + '</td><td>' + obj.EXPECTEDVOL + '</td>';
+                                newRow = newRow + '<td><td></td></tr>';
+
+                                $('#PvcLinetbl tfoot').append(newRow);
+
+                            });
+                        }
+                        else if (actionby == 1)// BY Approver
+                        {
+
+                            $.each(jsondata, function (index, obj) {
+                                var ImgApprove = '<img src="/AcxiomDesign/images/right_icon.png" onclick="UpdateLineStatus(2,\'' + obj.ITEMTYPECODE + '\')">';
+                                var ImgReject = '<img src="/AcxiomDesign/images/close_red.png" onclick="UpdateLineStatus(3,\'' + obj.ITEMTYPECODE + '\')">';
+                                var newRow = '<tr><td><input type="checkbox" class="singlechkbox" id="chkitemtfoot"></input></td><td>' + Number(index + 1) + '</td><td>' + obj.ITEMTYPEDESC + '</td><td>' + obj.ITEMTYPECODE + '</td><td>' + obj.ITEMNAME + '</td><td><span class="for_AmountSign">$ </span>' + obj.CURRENTVEP + '</td><td><span class="for_AmountSign">$ </span>' + obj.PROPOSEDVEP + '</td>';
+                                newRow = newRow + '<td><span class="for_AmountSign">$ </span>' + obj.PROPOSEDVIP + '</td><td>' + obj.DISCPERCASE + '</td><td>' + obj.DISCPERCENTAGE + '</td><td>' + obj.EXPECTEDVOL + '</td>';
+                                newRow = newRow + '<td>' + ImgApprove + '</td><td>' + ImgReject + '</td><td></td><td></td></tr>';
+
+                                $('#PvcLinetbl tfoot').append(newRow);
+
+                            });
+                        }
+
+
+
+                    }
+                    else {
+                        ShowMessage(jsondata.data);
+                    }
+
+                }
+            });
+
+        }
+    }
+
+    function UpdateLineStatus(UpdateType, ItemCode) {
+        var pvcnumber = $('#Pvnumber').text();
+        var entityId = $('#PVHeader_Entity').val();
+
+        if (entityId == "") {
+            ShowMessage('Please Select the Entity');
+            return false;
+        }
+        else if (pvcnumber == "") {
+            ShowMessage('PV No is blank!Please refresh the window');
+            return false;
+        }
+        else {
+            $.ajax({
+                type: "POST",
+                crossDomain: true,
+                dataType: 'json',
+                url: '/PriceVariance/PVCApproverLineAction?PVCNUM=' + pvcnumber + '&Entityid=' + entityId + '&ActionType=' + UpdateType + '&ItemCode=' + ItemCode + '',
+                success: function (responsedata) {
+                    debugger;
+                    if (responsedata.success) {
+                        $('#PvcLinetbl tfoot').empty();
+                        var jsondata = JSON.parse(responsedata.data);
+                        var isapprove = false;
+                        var isreject = false;
+                        $.each(jsondata, function (index, obj) {
+
+                            var ImgApprove = "";
+                            var ImgReject = "";
+                            var checkbox = "";
+                            if (obj.ISAPPROVE == 0) {
+
+                                isapprove = true;
+
+                                ImgApprove = '<img src="/AcxiomDesign/images/right_icon.png">';
+                            }
+                            else if (obj.ISAPPROVE == 1) {
+                                isreject = true;
+                                ImgReject = '<img src="/AcxiomDesign/images/close_red.png">';
+                            }
+                            else {
+                                isreject = false;
+                                isapprove = false;
+                                checkbox = '<input type="checkbox" class="singlechkbox" id="chkitemtfoot"></input>';
+                                ImgApprove = '<img src="/AcxiomDesign/images/right_icon.png" onclick="UpdateLineStatus(2,\'' + obj.ItemSelection + '\')">';
+                                ImgReject = '<img src="/AcxiomDesign/images/close_red.png" onclick="UpdateLineStatus(3,\'' + obj.ItemSelection + '\')">';
+                            }
+
+                            var newRow = '<tr><td>' + checkbox + '</td><td>' + obj.No + '</td><td>' + obj.ItemTypeDesc + '</td><td>' + obj.ItemSelection + '</td><td>' + obj.ItemName + '</td><td><span class="for_AmountSign">$ </span>' + obj.CurrentPriceVEP + '</td><td><span class="for_AmountSign">$ </span>' + obj.NewPriceVEP + '</td>';
+                            newRow = newRow + '<td><span class="for_AmountSign">$ </span>' + obj.NewPriceVIP + '</td><td>' + obj.Discount + '</td><td>' + obj.DiscountPer + '</td><td>' + obj.ExpectedVolumn + '</td>';
+                            newRow = newRow + '<td>' + ImgApprove + '</td><td>' + ImgReject + '</td><td></td><td></td></tr>';
+                            $('#PvcLinetbl tfoot').append(newRow);
+
+                            if (isapprove && isreject == false) {
+                                $("#btnReject").css({ display: "none" });
+                                $("#btnApprove").css({ display: "block" });
+                            }
+                            else { $("#btnApprove").css({ display: "none" }); }
+                            if (isreject && isapprove == false) {
+                                $("#btnReject").css({ display: "block" });
+                                $("#btnApprove").css({ display: "none" });
+                            }
+                            else { $("#btnReject").css({ display: "none" }); }
+                        });
+                    }
+                    else {
+                        ShowMessage(jsondata.data);
+                    }
+
+                }
+            });
+
+        }
+    }
+
+    function validatefile() {
+
+        var fileName = $('#FileUpload')[0].files[0];
+        var pvcnumber = $('#Pvnumber').text();
+        var data = new FormData();
+        if (document.getElementById("FileUpload").files.length == 0) {
+            ShowMessage("Please Select File First !");
+            return false;
+        }
+        if (fileName != undefined) {
+            var size = parseFloat(fileName.size / 1024).toFixed(2);
+            if (size > 5120) {
+                ShowMessage("File size must not exceed 5 MB.... !!")
+                return false;
+            }
+        }
+        if (pvcnumber == "") {
+            ShowMessage('PV No is blank!Please Saved the data First');
+            return false;
+        }
+        else {
+
+            if (document.getElementById("FileUpload").files.length > 0) {
+                data.append("PVFile", $('#FileUpload')[0].files[0]);
+                data.append("PVNumseq", pvcnumber);
+
+                $.ajax({
+                    url: '/PriceVariance/UploadPVfiles',
+                    type: 'POST',
+                    data: data,
+                    contentType: false,
+                    processData: false,
+                    success: function (responsedata) {
+                        if (responsedata.success)
+                        {
+                            debugger;
+                            var row = "";
+
+                            if (responsedata.exttype.toUpperCase() == ".PDF")
+                            {
+                                row = '<a class="img-show" href="' + responsedata.responseText + '" value="' + responsedata.responseText + '" target="_blank"><img class="upload-image" src = "/AcxiomDesign/images/pdf image.jpg" ></a>'
+
+                            }
+                            else if (responsedata.exttype.toUpperCase() == ".DOCX") {
+                                row = '<a class="img-show" href="' + responsedata.responseText + '" value="' + responsedata.responseText + '"  target="_blank"><img class="upload-image" src = "/AcxiomDesign/images/word.jpg" ></a>'
+
+                            }
+                            else if (responsedata.exttype.toUpperCase() == ".XLSX") {
+                                row = '<a class="img-show" href="' + responsedata.responseText + '" value="' + responsedata.responseText + '"  target="_blank"><img class="upload-image" src = "/AcxiomDesign/images/Excel image.jpg" ></a>'
+
+                            }
+
+                            else if (responsedata.exttype.toUpperCase() == ".JPG" || responsedata.exttype.toUpperCase() == ".JPEG" || responsedata.exttype.toUpperCase() == ".PNG") {
+                                row = '<a class="img-show" href="' + responsedata.responseText + '" value="' + responsedata.responseText + '"  target="_blank"><img class="upload-image" src = "/AcxiomDesign/images/jpg-image.jpg" ></a>'
+
+                            }
+
+
+
+                            $('#divImgUpload').append(row);
+                            $('#fileplaceholder').text('No file Chosen');
+                            ShowMessage("File uploaded successfully");
+                        }
+                        else {
+                            ShowMessage(responsedata.responseText);
+                        }
+
+                    }
+                });
+            } else {
+                ShowMessage("Plesae select the file to upload!");
+                return false;
+            }
+
+        }
+    }
+
+    function SavePVCData() {
+
+        var startDate = document.getElementById("StartDate").value;
+        var endDate = document.getElementById("EndDate").value;
+
+        var pvcnumber = $('#Pvnumber').text();
+        var entityId = $('#PVHeader_Entity').val();
+        var BranchId = $('#PVHeader_Branch').val();
+        BranchId = BranchId.split('-')[0];
+        var Pricetier = $('#PVHeader_PriceTier').val();
+        var CustApplicable = $('#PVHeader_CustomerApplicable').val();
+        var Desctiption = $('#PVHeader_Description').val();
+        var AccountSelection = $('#PVHeader_AccountSelection').val();
+        var AccountSelectiondesc = $('#PVHeader_AccountSelection option:selected').text();
+        var RowCount = $("#PvcLinetbl > tfoot").find("tr").length;
+        if (RowCount == 0) {
+            ShowMessage('Please Add the Line Details');
+            return false;
+        }
+
+        if (startDate == '') {
+            ShowMessage('Please Pick a "From Date"!');
+            return false;
+        }
+        else if (endDate == '') {
+            ShowMessage('Please Pick a "To Date"!');
+            return false;
+        }
+
+        else if ((Date.parse(startDate) > Date.parse(endDate))) {
+            ShowMessage('"To Date" should be greater than "From Date"!');
+            return false;
+        }
+        if (entityId == "") {
+            ShowMessage('Please Select the Entity');
+            return false;
+        }
+        else if (BranchId == "") {
+            ShowMessage('Please Select the Branch');
+            return false;
+        }
+        else if (CustApplicable == "") {
+            ShowMessage('Please Select the Customer Applicable');
+            return false;
+        }
+        else if (AccountSelection == "") {
+            ShowMessage('Please Select the Account Selection');
+            return false;
+        }
+        else if (Pricetier == "") {
+            ShowMessage('Please Select the Price tier');
+            return false;
+        }
+        else if (Desctiption == "") {
+            ShowMessage('Please Enter the Description');
+            return false;
+        }
+        else {
+            $.ajax({
+                type: "POST",
+                crossDomain: true,
+                dataType: 'json',
+                url: '/PriceVariance/SavePVCDetail?BranchId=' + BranchId + '&PriceTier=' + Pricetier + '&AccountSelection=' + AccountSelection + '&Desctiption=' + Desctiption + '&CustApplicable=' + CustApplicable + '&Entityid=' + entityId + '&AccountSelectionDesc=' + AccountSelectiondesc + '',
+                success: function (responsedata) {
+                    if (responsedata.success) {
+                        $('#btnsavePVC').css({ display: "none" });
+                        $("#btnSkip1stApproval").css({ display: "block" });
+                        $("#btnsubmit").css({ display: "block" });
+
+                        $('#PVHeader_Entity').attr('enabled', 'true').chosen("destroy");
+                        $('#PVHeader_Branch').attr('enabled', 'true').chosen("destroy");
+                        $('#PVHeader_PriceTier').attr('enabled', 'true').chosen("destroy");
+                        $('#PVHeader_CustomerApplicable').attr('enabled', 'true').chosen("destroy");
+                        $('#PVHeader_AccountSelection').attr('enabled', 'true').chosen("destroy");
+                        $('#PVHeader_Entity').attr('disabled', true);
+                        $('#PVHeader_Branch').attr('disabled', true);
+                        $('#PVHeader_PriceTier').attr('disabled', true);
+                        $('#PVHeader_CustomerApplicable').attr('disabled', true);
+
+                        $('#PVHeader_Description').attr('disabled', true);
+                        $('#PVHeader_AccountSelection').attr('disabled', true);
+                        var data=responsedata.responseText.split(":");
+                        $('#Pvnumber').text(data[1]);
+
+                        ShowMessage(responsedata.responseText);
+                    }
+                    else {
+                        ShowMessage(responsedata.responseText);
+                    }
+
+                }
+            });
+        }
+    }
+
+    function PVCUserAction(ActionType)
+    {
+        var pvcnumber = $('#Pvnumber').text();
+        var entityId = $('#PVHeader_Entity').val();
+        $.ajax({
+            type: "POST",
+            crossDomain: true,
+            dataType: 'json',
+            url: '/PriceVariance/PVCUserAction?PVCNUM=' + pvcnumber + '&Entityid=' + entityId + '&ActionType=' + ActionType + '',
+            success: function (responsedata) {
+                if (responsedata.success) {
+                    if (ActionType == "0") {
+                        setInterval(
+                            function () {
+                                var url = '/PriceVariance/PriceVariance';
+                                window.location.href = url;
+                            },
+                            2000
+                        );
+                    }
+                    else if (ActionType == "1") {
+                        $("#btnSkip1stApproval").css({ display: "none" });
+                        setInterval(
+                            function () {
+                                var url = '/PriceVariance/PriceVariance';
+                                window.location.href = url;
+                            },
+                            2000
+                        );
+                    }
+                    else if (ActionType == "2")
+                    {
+                        ShowMessage(responsedata.responseText);
+                        setInterval(
+                            function () {
+                                var url = '/PriceVariance/PriceVariance';
+                                window.location.href = url;
+                            },
+                            2000
+                        );
+                    }
+                    ShowMessage(responsedata.responseText);
+                }
+                else {
+                    ShowMessage(responsedata.responseText);
+                }
+
+            }
+        });
+    }
+
+    function UpdateHeaderStatus(UpdateType, status) {
+        var pvcnumber = $('#Pvnumber').text();
+        var entityId = $('#PVHeader_Entity').val();
+        var approvercmmt = "";
+        if (UpdateType == "0" && status == "1" ) {
+
+            approvercmmt = $('#PVHeader_firstApproverComment').val();
+            if (approvercmmt == "") {
+                ShowMessage("Please Enter the First Approver Comment");
+                return false;
+            }
+        }
+        if (status == "2") {
+
+            approvercmmt = $('#PVHeader_firstApproverComment').val();
+            if (approvercmmt == "") {
+                ShowMessage("Please Enter the First Approver Comment");
+                return false;
+            }
+        }
+        if (entityId == "") {
+            ShowMessage('Please Select the Entity');
+            return false;
+        }
+        else if (pvcnumber == "") {
+            ShowMessage('PV No is blank!Please refresh the window');
+            return false;
+        }
+        else {
+            $.ajax({
+                type: "POST",
+                crossDomain: true,
+                dataType: 'json',
+                url: '/PriceVariance/PVCApproverHeaderAction?PVCNUM=' + pvcnumber + '&Entityid=' + entityId + '&ActionType=' + UpdateType + '&Status=' + status + '&Approvercmmt=' + approvercmmt + '',
+                success: function (responsedata) {
+                    debugger;
+                    if (responsedata.success) {
+                        debugger;
+                        var jsondata = JSON.parse(responsedata.data);
+                        if (UpdateType == '0')
+                        {
+                            ShowMessage("Request for change raised successfully")
+                            setInterval(
+                                function () {
+                                    var url = '/PriceVariance/PVFormHistory';
+                                    window.location.href = url;
+                                },
+                                2000
+                            );
+
+
+
+                        }
+                        if (status == '2') {
+                            ShowMessage("Price Variance form Approved successfully")
+                            setInterval(
+                                function () {
+                                    var url = '/PriceVariance/PVFormHistory';
+                                    window.location.href = url;
+                                },
+                                2000
+                            );
+
+                        }
+                        else if (status == '3') {
+                            ShowMessage("Price Variance  form is Reject Successfully")
+                            setInterval(
+                                function () {
+                                    var url = '/PriceVariance/PVFormHistory';
+                                    window.location.href = url;
+                                },
+                                2000
+                            );
+
+                        }
+                    }
+                    else {
+                        ShowMessage(jsondata.data);
+                    }
+
+                }
+            });
+
+        }
+    }
+
+    function UpdateAllLineStatus(UpdateType) {
+        debugger;
+        var itemCode = $("#PvcLinetbl tfoot tr:has(input:checked)").map(function () {
+            var $tr = $(this);
+            var ItemCode = $tr.find("td:nth-child(4)").text();
+            return ItemCode;
+        }).toArray();
+        var pvcnumber = $('#Pvnumber').text();
+        var entityId = $('#PVHeader_Entity').val();
+        if (itemCode.length <= 0) {
+            ShowMessage("Please Select the Line To remove");
+            return false;
+        }
+
+        if (entityId == "") {
+            ShowMessage('Please Select the Entity');
+            return false;
+        }
+        else if (pvcnumber == "") {
+            ShowMessage('PV No is blank!Please refresh the window');
+            return false;
+        }
+        else {
+            $.ajax({
+                type: "POST",
+                crossDomain: true,
+                dataType: 'json',
+                url: '/PriceVariance/PVCApproverLineAction?PVCNUM=' + pvcnumber + '&Entityid=' + entityId + '&ActionType=' + UpdateType + '&ItemCode=' + itemCode + '',
+                success: function (responsedata) {
+                    debugger;
+                    if (responsedata.success) {
+                        $('#PvcLinetbl tfoot').empty();
+                        var jsondata = JSON.parse(responsedata.data);
+                        var isapprove = false;
+                        var isreject = false;
+                        $.each(jsondata, function (index, obj) {
+                            var ImgApprove = "";
+                            var ImgReject = "";
+                            var checkbox = "";
+                            if (obj.ISAPPROVE == 0) {
+
+                                isapprove = true;
+
+                                ImgApprove = '<img src="/AcxiomDesign/images/right_icon.png">';
+                            }
+                            else if (obj.ISAPPROVE == 1) {
+                                isreject = true;
+
+                                ImgReject = '<img src="/AcxiomDesign/images/close_red.png">';
+                            }
+                            else {
+                                isreject = false;
+                                isapprove = false;
+
+                                checkbox = '<input type="checkbox" class="singlechkbox" id="chkitemtfoot"></input>';
+                                ImgApprove = '<img src="/AcxiomDesign/images/right_icon.png" onclick="UpdateLineStatus(2,\'' + obj.ItemSelection + '\')">';
+                                ImgReject = '<img src="/AcxiomDesign/images/close_red.png" onclick="UpdateLineStatus(3,\'' + obj.ItemSelection + '\')">';
+                            }
+
+                            var newRow = '<tr><td>' + checkbox + '</td><td>' + obj.No + '</td><td>' + obj.ItemTypeDesc + '</td><td>' + obj.ItemSelection + '</td><td>' + obj.ItemName + '</td><td><span class="for_AmountSign">$ </span>' + obj.CurrentPriceVEP + '</td><td><span class="for_AmountSign">$ </span>' + obj.NewPriceVEP + '</td>';
+                            newRow = newRow + '<td><span class="for_AmountSign">$ </span>' + obj.NewPriceVIP + '</td><td>' + obj.Discount + '</td><td>' + obj.DiscountPer + '</td><td>' + obj.ExpectedVolumn + '</td>';
+                            newRow = newRow + '<td>' + ImgApprove + '</td><td>' + ImgReject + '</td><td></td><td></td></tr>';
+
+                            $('#PvcLinetbl tfoot').append(newRow);
+                            if (isapprove && isreject == false) {
+                                $("#btnReject").css({ display: "none" });
+                                $("#btnApprove").css({ display: "block" });
+                            }
+                            else { $("#btnApprove").css({ display: "none" }); }
+                            if (isreject && isapprove == false) {
+                                $("#btnReject").css({ display: "block" });
+                                $("#btnApprove").css({ display: "none" });
+                            }
+                            else { $("#btnReject").css({ display: "none" }); }
+
+                        });
+                    }
+                    else {
+                        ShowMessage(responsedata.data);
+                    }
+
+                }
+            });
+
+        }
+    }
+
+    function SaveChangeData(LineNO)
+    {
+        var startDate = document.getElementById("StartDate").value;
+        var enddate = document.getElementById("EndDate").value;
+        var entityId = $('#PVHeader_Entity').val();
+        var BranchId = $('#PVHeader_Branch').val();
+        BranchId = BranchId.split('-')[1];
+        var pvcnumber = $('#Pvnumber').text();
+        var currentPriceVEP = $('#CurrentPriceVEP_' + LineNO).val();
+        var newPriceVEP = $('#NewPriceVEP_' + LineNO).val();
+        var ExceptedVol = $('#ExpectedVolumn_' + LineNO).val();
+        var itemselection = $('#ItemSelection_' + LineNO).text();
+
+        if (startDate == '')
+        {
+            ShowMessage('Please Pick a "From Date"!');
+            return false;
+        }
+        else if (enddate == '')
+        {
+            ShowMessage('Please Pick a "To Date"!');
+            return false;
+        }
+        else if ((Date.parse(startDate) > Date.parse(enddate)))
+        {
+            ShowMessage('"To Date" should be greater than "From Date"!');
+            return false;
+        }
+        else if (entityId == "")
+        {
+            ShowMessage('Please Select the Entity');
+            return false;
+        }
+        else if (BranchId == "") {
+            ShowMessage('Please Select the Branch');
+            return false;
+        }
+        else
+        {
+            $.ajax({
+                type: "POST",
+                crossDomain: true,
+                dataType: 'json',
+                url: '/PriceVariance/PVCSaveRequestChangeData?Itemselection=' + itemselection + '&CurrentVEPprice=' + currentPriceVEP + '&NewVEPprice=' + newPriceVEP + '&VatPerBranch=' + BranchId + '&ExpectedVol=' + ExceptedVol + '&PVCNUM=' + pvcnumber + '&Entityid=' + entityId + '&Startdate=' + startDate + '&Enddate=' + enddate + '',
+                success: function (responsedata) {
+
+                    if (responsedata.success) {
+                        $('#EndDate').prop('disabled', true);
+                        $('#StartDate').prop('disabled', true);
+                        $('#PvcLinetbl tfoot').empty();
+                        var jsondata = JSON.parse(responsedata.data);
+                        $.each(jsondata, function (index, obj)
+                        {
+                            var SRNO = obj.NO;
+                            if (obj.STATUS == 0 || obj.STATUS == 2 || obj.STATUS == 4 || obj.STATUS == 6)
+                            {
+                                var newRow = '<tr><td><input type="checkbox" class="singlechkbox" id="chkitemtfoot"></input></td><td>' + SRNO + '</td><td>' + obj.ITEMTYPEDESC + '</td><td>' + obj.ITEMTYPECODE + '</td><td>' + obj.ITEMNAME + '</td><td><span class="for_AmountSign">$ </span>' + obj.CURRENTVEP + '</td><td><span class="for_AmountSign">$ </span>' + obj.PROPOSEDVEP + '</td>';
+                                newRow = newRow + '<td><span class="for_AmountSign">$ </span>' + obj.PROPOSEDVIP + '</td><td>' + obj.DISCPERCASE + '</td><td>' + obj.DISCPERCENTAGE + '</td><td>' + obj.EXPECTEDVOL + '</td>';
+                                    newRow = newRow + '<td><td></td></tr>';
+
+                            }
+                            else if (obj.STATUS == 3 || obj.STATUS == 5 || obj.STATUS == 7)
+                            {
+                                var newRow = '<tr><td><input type="checkbox" class="singlechkbox" id="chkitemtfoot"></input></td><td>' + SRNO + '</td><td>' + obj.ITEMTYPEDESC + '</td>';
+                                newRow = newRow + '<td id="ItemSelection_' + SRNO + '" >' + obj.ITEMTYPECODE + '</td><td>' + obj.ITEMNAME + '</td>';
+                                newRow = newRow + '<td><span class="mobile-before-label"></span><span class="for_AmountSign">$ </span><input type="text" onchange = "CalculateDiscountChange(' + SRNO + ')" class = "allow_numeric" style = "width:50px; font-size: 12px;" id= "CurrentPriceVEP_' + SRNO + '" value=' + obj.CURRENTVEP + '></input ></td >';
+                                newRow = newRow + '<td><span class="mobile-before-label"></span><span class="for_AmountSign">$ </span><input type="text" onchange = "CalculateDiscountChange(' + SRNO + ')" class = "allow_numeric" style = "width:50px; font-size: 12px;" id= "NewPriceVEP_' + SRNO + '" value=' + obj.PROPOSEDVEP + '></input ></td >';
+                                newRow = newRow + '<td id="NewPriceVIP_' + SRNO + '"><span class="for_AmountSign">$ </span>' + obj.PROPOSEDVIP + '</td><td id="Discount_' + SRNO + '">' + obj.DISCPERCASE + '</td><td id="DiscountPer_' + SRNO + '">' + obj.DISCPERCENTAGE + '</td>';
+                                newRow = newRow + '<td><span class="mobile-before-label"></span><input type="text"  class = "dontallow_decimal" style = "width:50px; font-size: 12px;" id= "ExpectedVolumn_' + SRNO + '" value=' + obj.EXPECTEDVOL + '></input ></td >';
+                                newRow = newRow + '<td><a href="#" onclick="SaveChangeData(' + SRNO + ')">Update</a><td></td></tr>';
+
+                            }
+                                $('#PvcLinetbl tfoot').append(newRow);
+
+                            });
+
+                    }
+                    else {
+                        ShowMessage(responsedata.data);
+                    }
+
+                }
+            });
+
+        }
+
+
+
+
+    }
+
+    function UpdatePVCData() {
+
+        var startDate = document.getElementById("StartDate").value;
+        var endDate = document.getElementById("EndDate").value;
+
+        var pvcnumber = $('#Pvnumber').text();
+        var entityId = $('#PVHeader_Entity').val();
+        var BranchId = $('#PVHeader_Branch').val();
+        BranchId = BranchId.split('-')[0];
+        var Pricetier = $('#PVHeader_PriceTier').val();
+        var CustApplicable = $('#PVHeader_CustomerApplicable').val();
+        var Desctiption = $('#PVHeader_Description').val();
+        var AccountSelection = $('#PVHeader_AccountSelection').val();
+        var AccountSelectiondesc = $('#PVHeader_AccountSelection option:selected').text();
+        var RowCount = $("#PvcLinetbl > tfoot").find("tr").length;
+        if (RowCount == 0) {
+            ShowMessage('Please Add the Line Details');
+            return false;
+        }
+
+        if (startDate == '') {
+            ShowMessage('Please Pick a "From Date"!');
+            return false;
+        }
+        else if (endDate == '') {
+            ShowMessage('Please Pick a "To Date"!');
+            return false;
+        }
+
+        else if ((Date.parse(startDate) > Date.parse(endDate))) {
+            ShowMessage('"To Date" should be greater than "From Date"!');
+            return false;
+        }
+        if (entityId == "") {
+            ShowMessage('Please Select the Entity');
+            return false;
+        }
+        else if (BranchId == "") {
+            ShowMessage('Please Select the Branch');
+            return false;
+        }
+        else if (CustApplicable == "") {
+            ShowMessage('Please Select the Customer Applicable');
+            return false;
+        }
+        else if (AccountSelection == "") {
+            ShowMessage('Please Select the Account Selection');
+            return false;
+        }
+        else if (Pricetier == "") {
+            ShowMessage('Please Select the Price tier');
+            return false;
+        }
+        else if (Desctiption == "") {
+            ShowMessage('Please Enter  the Desctiption');
+            return false;
+        }
+        else {
+            $.ajax({
+                type: "POST",
+                crossDomain: true,
+                dataType: 'json',
+                url: '/PriceVariance/PVCUpdateHeaderData?StartDate=' + startDate + '&EndDate=' + endDate + '&PVCNO=' + pvcnumber + '&BranchId=' + BranchId + '&PriceTier=' + Pricetier + '&AccountSelection=' + AccountSelection + '&Desctiption=' + Desctiption + '&CustApplicable=' + CustApplicable + '&Entityid=' + entityId + '&AccountSelectionDesc=' + AccountSelectiondesc + '',
+                success: function (responsedata) {
+                    if (responsedata.success) {
+                        $('#btnUpdatePVC').css({ display: "none" });
+                        $("#btnsubmit").css({ display: "block" });
+                        $("#btnSkip1stApproval").css({ display: "block" });
+                        $('#PVHeader_Entity').attr('enabled', 'true').chosen("destroy");
+                        $('#PVHeader_Branch').attr('enabled', 'true').chosen("destroy");
+                        $('#PVHeader_PriceTier').attr('enabled', 'true').chosen("destroy");
+                        $('#PVHeader_CustomerApplicable').attr('enabled', 'true').chosen("destroy");
+                        $('#PVHeader_AccountSelection').attr('enabled', 'true').chosen("destroy");
+                        $('#PVHeader_Entity').attr('disabled', true);
+                        $('#PVHeader_Branch').attr('disabled', true);
+                        $('#PVHeader_PriceTier').attr('disabled', true);
+                        $('#PVHeader_CustomerApplicable').attr('disabled', true);
+                        $('#StartDate').attr('disabled', true);
+                        $('#EndDate').attr('disabled', true);
+
+                        $('#PVHeader_Description').attr('disabled', true);
+                        $('#PVHeader_AccountSelection').attr('disabled', true);
+                        ShowMessage("Data Update Successfully");
+                    }
+                    else {
+                        ShowMessage(responsedata.responseText);
+                    }
+
+                }
+            });
+        }
+    }
+
+    function UpdatePVCDataApproval() {
+
+        var startDate = document.getElementById("StartDate").value;
+        var endDate = document.getElementById("EndDate").value;
+
+        var pvcnumber = $('#Pvnumber').text();
+        var entityId = $('#PVHeader_Entity').val();
+        var BranchId = $('#PVHeader_Branch').val();
+        BranchId = BranchId.split('-')[0];
+        var Pricetier = $('#PVHeader_PriceTier').val();
+        var CustApplicable = $('#PVHeader_CustomerApplicable').val();
+        var Desctiption = $('#PVHeader_Description').val();
+        var AccountSelection = $('#PVHeader_AccountSelection').val();
+        var AccountSelectiondesc = $('#PVHeader_AccountSelection option:selected').text();
+        var RowCount = $("#PvcLinetbl > tfoot").find("tr").length;
+        if (RowCount == 0) {
+            ShowMessage('Please Add the Line Details');
+            return false;
+        }
+
+        if (startDate == '') {
+            ShowMessage('Please Pick a "From Date"!');
+            return false;
+        }
+        else if (endDate == '') {
+            ShowMessage('Please Pick a "To Date"!');
+            return false;
+        }
+
+        else if ((Date.parse(startDate) > Date.parse(endDate))) {
+            ShowMessage('"To Date" should be greater than "From Date"!');
+            return false;
+        }
+        if (entityId == "") {
+            ShowMessage('Please Select the Entity');
+            return false;
+        }
+        else if (BranchId == "") {
+            ShowMessage('Please Select the Branch');
+            return false;
+        }
+        else if (CustApplicable == "") {
+            ShowMessage('Please Select the Customer Applicable');
+            return false;
+        }
+        else if (AccountSelection == "") {
+            ShowMessage('Please Select the Account Selection');
+            return false;
+        }
+        else if (Pricetier == "") {
+            ShowMessage('Please Select the Price tier');
+            return false;
+        }
+        else if (Desctiption == "") {
+            ShowMessage('Please Enter  the Desctiption');
+            return false;
+        }
+        else {
+            $.ajax({
+                type: "POST",
+                crossDomain: true,
+                dataType: 'json',
+                url: '/PriceVariance/PVCUpdateHeaderData?StartDate=' + startDate + '&EndDate=' + endDate + '&PVCNO=' + pvcnumber + '&BranchId=' + BranchId + '&PriceTier=' + Pricetier + '&AccountSelection=' + AccountSelection + '&Desctiption=' + Desctiption + '&CustApplicable=' + CustApplicable + '&Entityid=' + entityId + '&AccountSelectionDesc=' + AccountSelectiondesc + '',
+                success: function (responsedata) {
+                    if (responsedata.success) {
+                        $('#btnUpdatePVC').css({ display: "none" });
+                        $('#PVHeader_Entity').attr('enabled', 'true').chosen("destroy");
+                        $('#PVHeader_Branch').attr('enabled', 'true').chosen("destroy");
+                        $('#PVHeader_PriceTier').attr('enabled', 'true').chosen("destroy");
+                        $('#PVHeader_CustomerApplicable').attr('enabled', 'true').chosen("destroy");
+                        $('#PVHeader_AccountSelection').attr('enabled', 'true').chosen("destroy");
+                        $('#PVHeader_Entity').attr('disabled', true);
+                        $('#PVHeader_Branch').attr('disabled', true);
+                        $('#PVHeader_PriceTier').attr('disabled', true);
+                        $('#PVHeader_CustomerApplicable').attr('disabled', true);
+                        $('#StartDate').attr('disabled', true);
+                        $('#EndDate').attr('disabled', true);
+                        $('#PVHeader_Description').attr('disabled', true);
+                        $('#PVHeader_AccountSelection').attr('disabled', true);
+                        ShowMessage("Data Update Successfully");
+                    }
+                    else {
+                        ShowMessage(responsedata.responseText);
+                    }
+
+                }
+            });
+        }
+    }
+</script>

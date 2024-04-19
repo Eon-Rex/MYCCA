@@ -1,0 +1,89 @@
+﻿@model CCAF.Models.EmailConfigurationVM
+@{
+    ViewBag.Title = "Email Configuration";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style type="text/css">
+    .save_button button {
+        margin-top: -46px;
+        margin-right: 60px;
+    }
+
+    .table.order_table tr td:last-child {
+        text-align: center !important;
+    }
+
+    input.uomclass {
+        text-align: center;
+    }
+
+    .first_left_side p:first-child {
+        margin-top: 28px !important;
+    }
+
+    .first_left_side p {
+        margin-bottom: 21px !important;
+    }
+    .displaytogle{
+        display:none
+    }
+</style>
+
+<div class="loader_overlay">
+    <img src="~/AcxiomDesign/images/Loading-red.gif" id="loading" height="250px" width="250px" />
+</div>
+
+<div class="wrapper">
+    @using (Html.BeginForm("EmailConfiguration", "Home", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        //Dont Remove it
+        @Html.AntiForgeryToken()
+        <div class="top-title">
+            <h2>Email Configuration</h2>
+
+            <div class="save_button"> <button type="submit" onclick="return validatesavebtnclick();" id="btnsave">Save</button></div>
+
+        </div>
+
+
+        <div class="for-top-border">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-2 col-md-2 col-sm-4 col-xs-12 padding-zero mobileview-col-xs-6">
+                        <div class="first_left_side mobileview-col-xs-6 for_mobile_view_none">
+                            @*<p>@Html.LabelFor(m => m.ACTIVITYTYPE)</p>*@
+                            <p>@Html.LabelFor(m => m.DESCRIPTION)</p>
+                            <p>@Html.LabelFor(m => m.EMAILTO)</p>
+                            <p>@Html.LabelFor(m => m.EMAILCC)</p>
+                            <p>@Html.LabelFor(m => m.EMAILSUBJECT)</p>
+                            <p class="displaytogle">@Html.LabelFor(m => m.EMAILTITLE)</p>
+                            
+                        </div>
+                    </div>
+
+                    <div class="col-lg-7 col-md-6 col-sm-7 col-xs-12 mobileview-col-xs-6 mobile_view_responive_view">
+                        <div class="first_left_side for-float-right">
+                            <span class="for_mobile_view">Activity For :</span>
+                            @Html.TextBoxFor(m => m.DESCRIPTION, new { @readonly = "true" })
+                            <span class="for_mobile_view">Email To :</span>
+                            @Html.TextBoxFor(m => m.EMAILTO)
+                            <span class="for_mobile_view">Email Cc :</span>
+                            @Html.TextBoxFor(m => m.EMAILCC)
+                            <span class="for_mobile_view">Email Subject :</span>
+                            @Html.TextBoxFor(m => m.EMAILSUBJECT)
+                            @*<span class="for_mobile_view displaytogle">Email Title :</span>*@
+                            @Html.TextBoxFor(m => m.EMAILTITLE, new { @class= "displaytogle" })
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    }
+    <div class="footer-first">
+    </div>
+
+</div>
+@Html.Raw(ViewBag.div)

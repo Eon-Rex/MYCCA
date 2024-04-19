@@ -1,0 +1,673 @@
+﻿@model CCAF.Models.MyCartViewModel
+@using CCAF.Models
+@{
+    ViewBag.Title = "MyCart";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style type="text/css">
+    .confirm-product {
+        width: 70%;
+        float: right;
+    }
+
+    label {
+        margin-bottom: 0;
+    }
+
+    table.dataTable.no-footer {
+        max-height: 401px !important;
+        overflow-y: scroll !important;
+        height: 0 !important;
+    }
+
+    .new-bottom-border label {
+        font-weight: normal;
+        font-family: 'Montserrat', sans-serif;
+    }
+
+    .new-bottom-border input {
+        font-size: 12px;
+        font-family: 'Montserrat', sans-serif;
+    }
+
+    table.table.order_table tr th:first-child {
+        padding-left: 10px;
+    }
+
+    table.table.order_table tr th:nth-child(8) {
+        text-align: center !important;
+    }
+
+    table.table.order_table tr th {
+        padding: 9px 0 9px 0;
+        text-align: right;
+    }
+
+        table.table.order_table tr th:nth-child(3) {
+            text-align: center;
+            padding-left: 10px;
+        }
+
+        table.table.order_table tr th:nth-child(7) {
+            text-align: center;
+        }
+
+        table.table.order_table tr th:nth-child(6) {
+            text-align: center;
+        }
+
+        table.table.order_table tr th:nth-child(2) {
+            padding-left: 5px;
+            text-align: center;
+        }
+
+        table.table.order_table tr th:nth-child(10) {
+            width: 160px !important;
+        }
+
+        table.table.order_table tr th:nth-child(9) {
+            width: 98px;
+        }
+
+    table.dataTable tbody td {
+        padding: 0;
+    }
+
+    table.table.order_table.order_table-right2 tr td:nth-child(8) {
+        text-align: left;
+        padding-top: 0;
+    }
+
+    table.table.order_table.order_table-right2 tr td:nth-child(3) {
+        padding-left: 0;
+        padding-left: 25px;
+    }
+
+    table.table.order_table.order_table-right2 tr td:nth-child(4) {
+        text-align: left;
+        margin-right: 20px;
+    }
+
+    table.table.order_table.order_table-right2 tr th:nth-child(5) {
+        text-align: center;
+    }
+
+    table.table.order_table.order_table-right2 tr td:nth-child(7) {
+        text-align: right;
+    }
+
+    table.table.order_table.order_table-right2 tr td:nth-child(2) {
+        /*padding-right: 40px;*/
+        text-align: left !important;
+    }
+
+    table.table.order_table.order_table-right2 tr td input {
+        height: inherit;
+        text-align: right;
+    }
+
+    table.table.order_table tr th:last-child {
+        padding-right: 18px;
+        text-align: right;
+    }
+
+    .padding-right .chosen-container-single .chosen-search input[type=text] {
+        padding-right: 5px !important;
+    }
+
+    .table.dataTable.no-footer {
+        min-height: 0px !important;
+    }
+
+    .for_balanceCart p {
+        font-size: 15px;
+        color: #e51635;
+        display: inline-block;
+        float: left;
+        font-family: 'Montserrat', sans-serif;
+        margin: 60px 0px 0 300px;
+    }
+
+    .text_box_styling textarea {
+        border: 0;
+        width: inherit;
+        border-bottom: 1px solid #ccc;
+        height: 27px;
+        padding: 0;
+        margin-top: 10px;
+        outline: none;
+    }
+</style>
+<div class="loader_overlay">
+    <img src="~/AcxiomDesign/images/Loading-red.gif" id="loading" height="250px" width="250px" />
+</div>
+<div class="wrapper">
+    <div class="top-title"><h2>My Cart</h2></div>
+    <div class="container">
+        @using (Html.BeginForm("MyCart", "Catalog", FormMethod.Post, new { enctype = "multipart/form-data" }))
+        {
+            //Dont Remove it
+            @Html.AntiForgeryToken()
+            <div class="row for-row-margin">
+
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-zero">
+                    @*<div class="for_balance">
+
+                        </div>*@
+                    <div class="confirm-product mobile_cart">
+                        <div class="for_balanceCart">
+                            <p>Cr Bal : $<span id="CrBalanceDisplay">0</span></p>
+                            <span id="CreditBalance" style="display:none">0</span>
+                        </div>
+                        <span id="UserCode" style="display:none">@Session["USERCODE"].ToString()</span>
+                        <button type="button" onclick="validatesavebtnclick();" id="btnvalidate">Validate Stock</button>
+                        <a href="@ViewBag.ReturnURL">+ Products</a>@*Catalog For Developement Only, Please Remove Before Making it Live*@
+                        <button type="submit" onclick="return ConfirmClick();" disabled id="btnConfirm">Confirm</button>
+                    </div>
+
+                    <div class="left-side-bar for-order-margin">
+                        <div class="order_table_bg">
+                            <div class="padding-right">
+                                <table class="table order_table order_table-right new-bottom-border mobile_view_beforenone responsive-table">
+                                    <thead>
+                                        <tr>
+                                            <th style="text-align:left">@Html.LabelFor(m => m._CartHeader.OrderNo)</th>
+                                            <th style="text-align:left;">@Html.LabelFor(m => m._CartHeader.OrderDate)</th>
+                                            <th style="text-align:left;display:@ViewBag.PriceGroupVisible">@Html.LabelFor(m => m._CartHeader.OrderType)</th>
+                                            <th style="text-align:left; padding-left:10px;">@Html.LabelFor(m => m._CartHeader.CustomerName)</th>
+                                            <th style="text-align:left; padding-left:15px;">@Html.LabelFor(m => m._CartHeader.DeliveryType)</th>
+                                            <th style="text-align:left; padding-left:10px;">@Html.LabelFor(m => m._CartHeader.DeliveryDate)</th>
+                                            <th style="text-align:left; padding-left:10px;">@Html.LabelFor(m => m._CartHeader.Remark)</th>
+                                            <th style="text-align:left !important; padding-left:10px;">@Html.LabelFor(m => m._CartHeader.ReasonofOrder)</th>
+                                            <th>@Html.LabelFor(m => m._CartHeader.Amount)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><span class="mobile-before-label">Order No</span>@Html.TextBoxFor(m => m._CartHeader.OrderNo, new { @class = "", @readonly = "true" })</td>
+                                            <td><span class="mobile-before-label">Order Date</span>@Html.TextBoxFor(m => m._CartHeader.OrderDate, new { @class = "inputdate flatpickr flatpickr-input active orderdate width_here", @id = "OrderDate" })</td>
+                                            <td style="display:@ViewBag.PriceGroupVisible">
+                                                <span class="mobile-before-label">Order Type</span>
+                                                @Html.TextBoxFor(m => m._CartHeader.OrderType, new { @class = "order_type", @readonly = "true" })
+                                                @*@Html.DropDownListFor(m => m._CartHeader.OrderType, ViewBag.OrderTypeDropdown as SelectList, new { @class = "order_type searchable", @style = "" })*@
+                                            </td>
+                                            <td><span class="mobile-before-label">Customer Name</span>@Html.TextBoxFor(m => m._CartHeader.CustomerName, new { @class = "", @readonly = "true" })</td>
+                                            <td>
+                                                <span class="mobile-before-label">Delivery Type</span>@Html.DropDownListFor(m => m._CartHeader.DeliveryType, ViewBag.DeliveryTypeDropdown as SelectList, new { @class = "searchable" })
+                                            </td>
+                                            <td><span class="mobile-before-label">Delivery Date</span>@Html.TextBoxFor(m => m._CartHeader.DeliveryDate, new { @class = "inputdate flatpickr flatpickr-input active deliverydate width_here" })</td>
+                                            <td class="text_box_styling">
+                                                <span class="mobile-before-label">Remark</span>@Html.TextAreaFor(m => m._CartHeader.Remark, new
+                                                                                                               {
+                                                                                                                   @placeholder = "Free Text (Max 60 Characters)",
+                                                                                                                   @rows = "2",
+                                                                                                                   @cols = "25",
+                                                                                                                   @maxlength = "60"
+                                                                                                               })
+                                            </td>
+                                            <td class="text_box_styling">
+                                                <span class="mobile-before-label">Reason of Order</span>@Html.TextAreaFor(m => m._CartHeader.ReasonofOrder, new
+                                                                                               {
+                                                                                                   @placeholder = "Free Text (Max 200 Characters)",
+                                                                                                   @rows = "2",
+                                                                                                   @cols = "25",
+                                                                                                   @maxlength = "200"
+                                                                                               })
+                                            </td>
+                                            <td><span class="mobile-before-label">Amount</span>@Html.TextBoxFor(m => m._CartHeader.Amount, new { @readonly = "true", @id = "headerAmount", @style = "text-align:right" })</td>
+                                        </tr>
+
+
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <table id="Linetbl" class="add-new-class table order_table order_table-right2 for-margin cell-border mobile_view_beforenone responsive-table">
+                            <thead>
+                                <tr>
+                                    <th>SrNo</th>
+                                    <th>Product Code</th>
+                                    <th>Product Name</th>
+                                    <th>Order Qty</th>
+                                    <th style="width: 40px !important">UOM</th>
+                                    <th>Unit Price(VEP)</th>
+                                    <th>Unit Price(VIP)</th>
+                                    <th style="display:@ViewBag.PriceGroupVisible"><span id="Price_GP">Price GP</span></th> @*style="display:none"*@
+                                    <th>Tax Amount</th>
+                                    <th>Extended Amount(VIP)</th>
+                                    <th>Outof Stock</th>
+                                    <th><img src="~/AcxiomDesign/images/cancel_red.png" /></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model._CartLine != null && Model._CartLine.Count > 0)
+                                {
+                                    //int i = 0, srno = 1; var ImgId = "outofstock_";var RowIdTable = "";
+                                    int i = 1, srno = 1; var ImgId = "outofstock_"; var RowIdTable = "";
+                                    foreach (OLine d in Model._CartLine)
+                                    {
+                                        ImgId = "outofstock_" + srno;
+                                        RowIdTable = @d.ProductCode + '_' + srno;
+                                        <tr id=@RowIdTable>
+                                            <td>
+                                                <span class="mobile-before-label">Srno</span>@srno
+                                                <input class="x3" type="text" style="visibility:hidden" value="@srno"></input>
+                                            </td>
+                                            <td><span class="mobile-before-label">Product Code</span>@Html.TextBoxFor(o => d.ProductCode, new { @style = "text-align: left;", @class = "tabel_text_box x1", @readonly = "true", @id = "ProductCode_" + i })  </td>
+                                            <td><span class="mobile-before-label">Product Name</span>@d.ProductName</td>
+                                            <td><span class="mobile-before-label">Order Qty</span>@Html.TextBoxFor(o => d.Qty, new { @class = "tabel_text_box x2", @readonly = "true", @id = "OrderQty_" + i })</td>
+                                            <td><span class="mobile-before-label">UOM</span>@Html.TextBoxFor(o => d.UOM, new { @class = "tabel_text_box", @readonly = "true", @id = "UOM_" + i })</td>
+                                            <td><span class="mobile-before-label">Unit Price(VEP)</span>@Html.TextBoxFor(o => d.UnitPriceVEP, new { @class = "tabel_text_box", @readonly = "true", @id = "UnitPriceVEP_" + i })</td>
+                                            <td><span class="mobile-before-label">Unit Price(VIP)</span>@Html.TextBoxFor(o => d.UnitPriceVIP, new { @class = "tabel_text_box", @readonly = "true", @id = "UnitPriceVIP_" + i })</td>@*ViewBag.PriceGroupDropDown as SelectList*@
+                                            <td style="display:@ViewBag.PriceGroupVisible"><span class="mobile-before-label">Price GP</span>@Html.DropDownListFor(o => d.PriceGP, new SelectList(ViewBag.PriceGroupDropDown as List<SelectListItem>, "Value", "Text", d.PriceGP), new { @class = "tabel_text_box searchable", @id = "PriceGP_" + i, @onchange = "GridPriceGroupChange(" + i.ToString() + ")" })</td>
+                                            <td><span class="mobile-before-label">Tax Amount</span>@Html.TextBoxFor(o => d.TaxAmount, new { @class = "tabel_text_box", @readonly = "true", @id = "TaxAmount_" + i })</td>
+                                            <td><span class="mobile-before-label">Extended Amount(VIP)</span>@Html.TextBoxFor(o => d.ExtendedPriceVIP, new { @class = "tabel_text_box", @readonly = "true", @id = "ExtPrice_" + i })</td>
+                                            <td class="center-img"><span class="mobile-before-label">OutofStock</span><img id=@ImgId src="/AcxiomDesign/images/alert_icon.png" /></td>
+                                            <td>
+                                                <span class="mobile-before-label">Delete</span> <a>@Html.Image(src: "../AcxiomDesign/images/cancel.png", altText: "Delete", onclickfns: "DeleteRow('" + i.ToString() + "','" + @d.ProductCode + "','" + @d.ExtendedPriceVIP + "')")</a>
+                                            </td>
+                                        </tr>
+                                        i++;
+                                        srno++;
+                                    }
+                                }
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+
+    <div class="footer-first">
+    </div>
+
+</div>
+
+@Html.Raw(TempData["msg"])
+
+<script type="text/javascript">
+    var gSeqNo = -1;
+    var gCount = 0;
+    var gInHandCount = 0;
+    var gCustCode = '';
+    var prodArr = [];
+    var qtyArr = [];
+    var seqArr = [];
+
+    $(document).ready(function () {
+        var table = $('#Linetbl').DataTable({
+            "dom": '<"clear">'
+            // , responsive: true
+            , "order": [[1, "desc"]]
+            , scrollCollapse: true
+            , paging: false
+            , "oLanguage": {
+                "sZeroRecords": "No Products in Cart, Please Add Some Products from Catalog.",
+                "sEmptyTable": "No Products in Cart, Please Add Some Products from Catalog."
+            }
+            , columnDefs: [{
+                targets: 0,
+                className: 'dt-body-center'
+            }, {
+                targets: 1,
+                className: 'dt-body-left'
+            }, {
+                targets: 2,
+                className: 'dt-body-nowrap'
+            }]
+        });
+        new $.fn.dataTable.FixedHeader(table, {
+            "alwaysCloneTop": true
+        });
+        //$("#Linetbl > tbody").empty().draw();
+        //table.clear().draw();
+
+        var check_in = flatpickr(".orderdate", { dateFormat: "d-M-Y", minDate: "today", defaultDate: new Date(), maxDate: "today" });//,maxDate: "today"
+        var check_out = flatpickr(".deliverydate", { dateFormat: "d-M-Y", minDate: "today", defaultDate: new Date() });//,maxDate: "today"
+        //UpdateFooter();
+        Customer_SelectedIndexChanged();
+    });
+
+    function Customer_SelectedIndexChanged() {
+        $('.loader_overlay, #loading').show();
+        var custid = $('#UserCode').text();
+        //var args = {
+        //    FunctionName: 'GetCustomerDetailsbyID'
+        //   , objData: '{}'
+        //   , specific:2
+        //}
+        $.ajax({
+            type: "GET",
+            crossDomain: true,
+            dataType: 'json',
+            url: '/GenerateOrder/GetCustomerDetailsbyID?CustomerID=' + custid,// url: 'Url.Action("GetData", "GenerateOrder")',
+            success: function (data) {
+                var psre = data[0].Address;
+                $('#CrBalanceDisplay').text(data[0].CRBALDISPLAY);
+                $('#CreditBalance').text(data[0].Credit);
+            },
+            complete: function () {
+                $('#loading').hide();
+                $('.loader_overlay').fadeOut();
+            },
+            failure: function (text) {
+                ShowMessage('Customer Details not Found, Please Try Again.');
+            },
+            error: function (text) {
+                ShowMessage('Customer Details not Found, Please Try Again.');
+            }
+        })
+
+    }
+
+    function DeleteRow(id, code, ExtendedPriceVIP) {
+        debugger;
+        $('.loader_overlay, #loading').show();
+
+        var RowTbaleId = '#' + code + '_' + id;
+        var deleteByid = '#' + code;
+        var TaxAmountid = '#TaxAmount_' + id;
+        var ExtPriceVIPid = '#ExtendedPriceVIP_' + id;
+        var CurrentheaderTotAmount = $('#headerAmount').val();
+        var TaxAmount = $(TaxAmountid).val();
+        TaxAmount = TaxAmount == '' ? 0 : TaxAmount;
+        var ExtPriceVIP = ExtendedPriceVIP;//10;//$(ExtPriceVIPid).val();
+        ExtPriceVIP = ExtPriceVIP == '' ? 0 : ExtPriceVIP;
+        var NewheaderTotAmount = (+CurrentheaderTotAmount) - (+ExtPriceVIP);
+
+        var args = {
+            FunctionName: 'SAVEITEMCATALOGTOCART'
+            , objData: '{"ITEMID":"' + code + '","QTY":"0"}'
+            , specific: 2
+        }
+
+        var selectedId = 'code';
+        $.ajax({
+            type: "GET",
+            crossDomain: true,
+            dataType: 'json',
+            //data: args,
+            //url: 'Url.Action("GetData", "GenerateOrder")',
+            url: '/Catalog/SAVEITEMCATALOGTOCART?ProductID=' + code + '&Qty=' + 0,
+            success: function (text) {
+                if (text[0].status == 'success') {
+                    var table = $('#Linetbl').DataTable().row($(RowTbaleId)).remove();
+                    //UpdateFooter();
+                    table.draw();
+                    $('#headerAmount').val(NewheaderTotAmount.toFixed(2));
+                    ShowMessage('Line Item with Code : ' + code + ' Deleted Successfully!');
+                }
+            },
+            complete: function () {
+                $('#loading').hide();
+                $('.loader_overlay').fadeOut();
+            },
+            failure: function (text) {
+                ShowMessage(text.responseText);
+            },
+            error: function (text) {
+                ShowMessage(tex.responseText);
+            }
+        });
+    };
+
+    function CheckCredeitBalanceLimit() {
+        var creditBal = $('#CreditBalance').text();
+        if (creditBal == '') {
+            creditBal = 0;
+        }
+        var _Total_ExtendedPrice = 0.00;
+        $("table tbody .ExtCell").each(function (index) {
+            _Total_ExtendedPrice += parseFloat($(this).val());
+        });
+        if (_Total_ExtendedPrice == '') {
+            _Total_ExtendedPrice = 0;
+        }
+        if (parseInt(creditBal) < (parseInt(_Total_ExtendedPrice))) {
+            ShowMessage('Extended Amount VIP Total can not exceed Credit Balance');
+            return false;
+        }
+        else return true;
+    }
+
+    function UpdateFooter() {
+        //update Footer
+        var _Total_ExtendedPrice = 0.00; //= $('#Total_ExtendedPrice').text();
+        var _Total_Amount = 0.00; //= $('#Total_Amount').text();
+        var response = false;
+        $("table tbody .TaxCell").each(function (index) {
+            _Total_Amount += parseFloat($(this).val());
+        });
+        if (_Total_Amount == '') {
+            _Total_Amount = 0;
+        }
+        $('#Total_Amount').text(_Total_Amount);
+
+        $("table tbody .ExtCell").each(function (index) {
+            _Total_ExtendedPrice += parseFloat($(this).val());
+        });
+        if (_Total_ExtendedPrice == '') {
+            _Total_ExtendedPrice = 0;
+        }
+        $('#Total_ExtendedPrice').text(_Total_ExtendedPrice);
+
+        //_Total_ExtendedPrice = parseInt(_Total_ExtendedPrice) - parseInt(ExtPriceVIP);
+        //if (_Total_Amount == '') {
+        //    _Total_Amount = 0;
+        //}
+        //_Total_Amount = parseInt(_Total_Amount) - parseInt(TaxAmount);
+        //$('#Total_Amount').text(_Total_Amount);
+    }
+
+    function validatesavebtnclick() {
+        //var table = $("#Linetbl tbody");
+        var customercode = $('#UserCode').text();
+        var seqno = 0;
+
+        gSeqNo = -1;
+        gCount = 0;
+        gInHandCount = -1;
+        gCustCode = '';
+        prodArr = [];
+        qtyArr = [];
+        seqArr = [];
+
+
+        $("#Linetbl tr").each(function () {
+            var productId = $(this).find("input.x1").val(),
+              Quantity = $(this).find("input.x2").val(),
+              Seqno1 = $(this).find("input.x3").val();
+
+            if (typeof productId !== "undefined") {
+                prodArr.push(productId);
+                qtyArr.push(Quantity);
+                seqArr.push(Seqno1);
+            }
+        })
+        if (prodArr.length > 0) {
+            gCustCode = customercode;
+            callChkItemStock();
+        }
+
+    }
+
+    function callChkItemStock() {
+        if (prodArr.length > gCount) {
+            CheckItemStock(seqArr[gCount], gCustCode, prodArr[gCount], qtyArr[gCount]);
+            $('#btnvalidate').prop('disabled', true);
+        }
+        else {
+            $('#btnConfirm').prop('disabled', false);
+        }
+    }
+
+    function CheckItemStock(seqno, customercode, prodid, OrdQty) {
+        var OnHandQty = 0;
+        //alert(seqno + '==' + customercode + '==' + prodid + '==' + OrdQty);
+        $.ajax({
+            type: "GET",
+            crossDomain: true,
+            dataType: 'json',
+            url: '/GenerateOrder/GetItemStockList?CustomerID=' + customercode + '&ProductId=' + prodid,
+            success: function (data) {
+                OnHandQty = data;
+                if (OnHandQty < OrdQty) {
+                    //alert("SeqNo. : " + seqno + " Item : " + prodidList + " OnHand: " + OnHandQty + " OrdQty : " + Quantity);
+                    gSeqNo = seqno;
+                    var lblMessage1 = 'Order quantity ' + OrdQty + ' exceed the onhand quantity ' + OnHandQty + ' for product ' + prodid + '. Do you wish to proceed?';
+                    $('#lblMessage1').html(lblMessage1)
+                    $('.DraftOrderPopUpNew').fadeIn('500');
+
+                    //return false;
+                }
+                else {
+                    gSeqNo = seqno;
+                    //alert("#outofstock_" + gSeqNo);
+                    $("#outofstock_" + gSeqNo).attr("src", "/AcxiomDesign/images/right_icon.png");
+                    gCount += 1;
+                    callChkItemStock();
+                }
+            },
+            failure: function (text) {
+                ShowMessage('Failed to get Item OnHandStock ' + text.responseText);
+            },
+            error: function (text) {
+                ShowMessage('Failed to get Item OnHandStock ' + text.responseText);
+            }
+        })
+    }
+
+    function yesfunction1() {
+        status = 0;
+        $('.DraftOrderPopUpNew').fadeOut('500');
+        $("#outofstock_" + gSeqNo).attr("src", "/AcxiomDesign/images/close_red.png");
+        gCount += 1;
+        callChkItemStock();
+    };
+
+    function nofunction1() {
+        debugger;
+        var ExtPrice = $('#ExtPrice_' + (gSeqNo-1));
+        var _ExtendedPriceVIP = ExtPrice.val();
+        DeleteRow(gSeqNo, prodArr[gCount], _ExtendedPriceVIP);
+        status = 0;
+        $('.DraftOrderPopUpNew').fadeOut('500');
+        gCount += 1;
+        callChkItemStock();
+    };
+
+    function ConfirmClick() {
+        debugger;
+        if (!CheckCredeitBalanceLimit()) {
+            return false;
+        }
+        var WebOrderNo = $("input[name$='OrderNo']").val();
+
+        var RowCount = $("#Linetbl > tbody").find("tr").find("td").length;
+        if (RowCount == 1) {
+            ShowMessage('No Product found in Cart, Please Add Some Products from Catalog.');
+            return false;
+        }
+
+        if (WebOrderNo == '') {
+            ShowMessage('No Product found in Cart, Please Add Some Products from Catalog.');
+            return false;
+        }
+        $('.loader_overlay, #loading').show();
+        return true;
+        var Parm = '{ "WEBORDERNO":"' + $("input[name$='OrderNo']").val() + '","STATUSCHECK":0,"STATUSSET":1 }';
+        var args = {
+            FunctionName: 'UPDATEORDERSTATUS'
+            , objData: Parm
+            , specific: 2
+        }
+        var selectedId = 'code';
+        debugger;
+        $('.loader_overlay, #loading').show();
+        $.ajax({
+            type: "GET",
+            crossDomain: true,
+            dataType: 'json',
+            data: args,
+            //url: 'Url.Action("UPDATECARTORDERSTATUS", "Catalog")',
+            url: '/Catalog/UPDATECARTORDERSTATUS?weborderno=' + $("input[name$='OrderNo']").val() + '&',
+            success: function (text) {
+                debugger;
+                if (text[0].status == 'success') {
+                    $("input[name$='OrderNo']").val('');
+                    var table = $('#Linetbl').DataTable();
+                    table.clear().draw();
+                    ShowMessage('Order No: ' + text[0].orderno + ' Confirmed Successfully!');
+                }
+                else if (text[0].status == 'failure') {
+                    ShowMessage(text[0].orderno);
+                }
+                ////HttpContext.Current.Session["IndentNo"]=text.responseText;
+                //$('#lblIndentNo').val(text.replace(/\"/g, ""));
+                ////$.each(data, function (index, obj) {
+
+                ////});
+                //$('.catalog-overlay').fadeOut('500');
+            },
+            complete: function () {
+                $('#loading').hide();
+                $('.loader_overlay').fadeOut();
+            },
+            failure: function (text) {
+                ShowMessage('Order No: ' + text[0].orderno + ' Not Confirmed, Please Retry!');
+            },
+            error: function (text) {
+                ShowMessage(text.text);
+                //debugger;
+                //alert(text.responseText);
+            }
+        });
+    }
+
+    function GridPriceGroupChange(id) {
+        $('.loader_overlay, #loading').show();
+        var _ITEMID = '#ProductCode_' + id;
+        var _PRICEGROUP = '#PriceGP_' + id;
+        var _QTY = '#OrderQty_' + id;
+
+        var _UnitPriceVIP = '#UnitPriceVIP_' + id;
+        var _UnitPriceVEP = '#UnitPriceVEP_' + id;
+        var _TaxAmount = '#TaxAmount_' + id;
+        var _ExtendedPriceVIP = '#ExtPrice_' + id;
+        var custid = $('#UserCode').text();
+        //var Parmlist = '{"PRICEGROUP":"' + $(_PRICEGROUP).val() + '","ITEMID":"' + $(_ITEMID).val() + '","QTY":"' + $(_QTY).val() + '"}';
+        $.ajax({
+            type: "GET",
+            crossDomain: true,
+            dataType: 'json',//GetAddLineItemOnPriceGroupChange
+            //url: '/GenerateOrder/GetData?FunctionName=GETLINEONPRICEGROUPCHANGE&objData=' + Parmlist + '&specific=2',
+            url: '/Catalog/GetAddLineItemOnPriceGroupChange?ProductID=' + $(_ITEMID).val() + '&CustomerID=' + custid + '&Qty=' + $(_QTY).val() + '&Pricegroup=' + $(_PRICEGROUP).val(),
+            success: function (response) {
+                $(_UnitPriceVIP).val(response[0].UNITPRICEVIP.toFixed(2));
+                $(_UnitPriceVEP).val(response[0].UNITPRICEVEP.toFixed(2));
+                $(_TaxAmount).val(response[0].TAXAMOUNT.toFixed(2));
+                $(_ExtendedPriceVIP).val(response[0].EXTPRICEVIP.toFixed(2));
+                $('#headerAmount').val(response[0].TOTALAMOUNT.toFixed(2));
+            },
+            complete: function () {
+                $('#loading').hide();
+                $('.loader_overlay').fadeOut();
+            },
+            failure: function (text) {
+                ShowMessage(text[0][0]);
+                //ShowMessage('Price group Not Changed, Please Retry.');
+            },
+            error: function (text) {
+                var message = text.responseText;
+                ShowMessage(message);
+            }
+        });
+    }
+
+</script>
